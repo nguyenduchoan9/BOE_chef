@@ -1,27 +1,29 @@
 package com.example.bipain.boe_restaurantapp;
 
+import com.example.bipain.boe_restaurantapp.model.Dish;
+
 /**
  * Created by BiPain on 6/5/2017.
  */
 
 public class DishInQueue {
-    private int dishId;
+    private Dish dish;
     private int orderId;
 
-    public DishInQueue(int dishId, int orderId) {
-        this.dishId = dishId;
+    public DishInQueue(Dish dish, int orderId) {
+        this.dish = dish;
         this.orderId = orderId;
     }
 
     public DishInQueue() {
     }
 
-    public int getDishId() {
-        return dishId;
+    public Dish getDish() {
+        return dish;
     }
 
-    public void setDishId(int dishId) {
-        this.dishId = dishId;
+    public void setDish(Dish dish) {
+        this.dish = dish;
     }
 
     public int getOrderId() {

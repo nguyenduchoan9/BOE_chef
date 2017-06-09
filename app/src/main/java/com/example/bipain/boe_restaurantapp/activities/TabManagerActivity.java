@@ -11,7 +11,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.example.bipain.boe_restaurantapp.Category;
 import com.example.bipain.boe_restaurantapp.DishInOrder;
+import com.example.bipain.boe_restaurantapp.QueueDish;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.adapter.PagerFragmentAdapter;
 import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
@@ -42,6 +44,9 @@ public class TabManagerActivity extends AppCompatActivity {
     private Retrofit apiService;
     private Services services;
     HashMap<Integer, ArrayList<DishInOrder>> orders;
+    QueueDish queueDish;
+    ArrayList<Category> categories = new ArrayList<>();
+    ArrayList<Dish> dishes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,7 @@ public class TabManagerActivity extends AppCompatActivity {
         endpointManager = new EndpointManager(this);
         apiService = new RetrofitUtils(preferencesManager, endpointManager).create();
         services = apiService.create(Services.class);
+        queueDish = new QueueDish();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,15 +102,15 @@ public class TabManagerActivity extends AppCompatActivity {
     }
 
     public void setOrders() {
-        Dish dish1 = new Dish(1, "Vit Quay Bac Kinh");
-        Dish dish2 = new Dish(2, "Ngheu xao sa ot");
-        Dish dish3 = new Dish(3, "Oc quan xao dua");
-        Dish dish4 = new Dish(4, "Be Thui Cau Mong");
-        Dish dish5 = new Dish(5, "Banh trang cuon thit heo 2 dau da");
-        Dish dish6 = new Dish(6, "De Nuong Nam Dinh");
-        Dish dish7 = new Dish(7, "Ga deo le gion cay");
-        Dish dish8 = new Dish(8, "Muc ham ruou sa ke");
-        Dish dish9 = new Dish(9, "Vit Tiem thuoc bac");
+        Dish dish1 = new Dish(1, "Vit Quay Bac Kinh", 1);
+        Dish dish2 = new Dish(2, "Ngheu xao sa ot", 1);
+        Dish dish3 = new Dish(3, "Oc quan xao dua", 1);
+        Dish dish4 = new Dish(4, "Be Thui Cau Mong", 1);
+        Dish dish5 = new Dish(5, "Banh trang cuon thit heo 2 dau da", 1);
+        Dish dish6 = new Dish(6, "De Nuong Nam Dinh", 1);
+        Dish dish7 = new Dish(7, "Ga deo le gion cay", 1);
+        Dish dish8 = new Dish(8, "Muc ham ruou sa ke", 1);
+        Dish dish9 = new Dish(9, "Vit Tiem thuoc bac", 1);
 
         DishInOrder dishInOrder1 = new DishInOrder(1, dish1);
         DishInOrder dishInOrder2 = new DishInOrder(1, dish2);
@@ -144,5 +150,29 @@ public class TabManagerActivity extends AppCompatActivity {
         Intent i = new Intent(context, TabManagerActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         return i;
+    }
+
+    public ArrayList<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(ArrayList<Category> categories) {
+        this.categories = categories;
+    }
+
+    public ArrayList<Dish> getDishes() {
+        return dishes;
+    }
+
+    public void setDishes(ArrayList<Dish> dishes) {
+        this.dishes = dishes;
+    }
+
+    public QueueDish getQueueDish() {
+        return queueDish;
+    }
+
+    public void setQueueDish(QueueDish queueDish) {
+        this.queueDish = queueDish;
     }
 }
