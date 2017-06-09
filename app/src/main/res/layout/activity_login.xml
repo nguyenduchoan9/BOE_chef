@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.bipain.boe_restaurantapp.activities.LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="72dp"
+        android:layout_marginRight="72dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnChef"
+            style="@style/ChefLoginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="login as chef"/>
+
+        <Button
+            android:layout_marginTop="16dp"
+            android:id="@+id/btnWaiter"
+            style="@style/WaiterLoginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login as waiter"/>
+    </LinearLayout>
+</RelativeLayout>

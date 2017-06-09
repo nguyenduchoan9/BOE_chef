@@ -6,4 +6,22 @@
     <color name="windowBackground">#FFFFFF</color>
     <color name="navigationBarColor">#000000</color>
     <color name="colorAccent">#c8e8ff</color>
+
+    <color name="gray">#E1E1E1</color>
+    <color name="register">#1d60a7</color>
+    <color name="colorTextNavigation">#cc5b5858</color>
+    <color name="colorTextPrimaryNavigation">#000000</color>
+    <color name="colorDividerNavigation">#DEBF8B8B</color>
+    <color name="tran_gray">#bbffffff</color>
+    <color name="white">#ffffff</color>
+    <color name="aqua">#6BBAA7</color>
+    <color name="gray_light">#dfdfdf</color>
+    <color name="blur_white">#66ffffff</color>
+    <color name="order_green">#00cc00</color>
+
+    <color name="holoBlueBright">@android:color/holo_blue_bright</color>
+    <color name="holoGreenLight">@android:color/holo_green_light</color>
+    <color name="holoOrangeLight">@android:color/holo_orange_light</color>
+    <color name="holoRedLight">@android:color/holo_red_light</color>
+    <color name="colorChef">#D32F2F</color>
 </resources>

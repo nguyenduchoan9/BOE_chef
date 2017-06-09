@@ -1,17 +1,16 @@
-package com.example.bipain.boe_restaurantapp;
+package com.example.bipain.boe_restaurantapp.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.bipain.boe_restaurantapp.model.Order;
+import com.example.bipain.boe_restaurantapp.R;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by BiPain on 6/4/2017.

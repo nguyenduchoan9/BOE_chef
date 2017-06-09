@@ -1,0 +1,30 @@
+package com.example.bipain.boe_restaurantapp.utils;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+/**
+ * Created by hoang on 27/05/2017.
+ */
+
+public class EndpointManager {
+    public static final String ENDPOINT = "ENDPOINT";
+    private SharedPreferences sharedPreferences;
+
+    public EndpointManager(Context context) {
+        this.sharedPreferences = context.getSharedPreferences(
+                Constant.ID, Context.MODE_PRIVATE);
+    }
+
+    public String getEndpoint() {
+        Constant.API_ENDPOINT = sharedPreferences.getString(ENDPOINT, Constant.API_ENDPOINT);
+        return Constant.API_ENDPOINT;
+    }
+
+    public void setEndpoint(String endpoint) {
+        Constant.API_ENDPOINT = endpoint;
+        sharedPreferences.edit()
+                .putString(ENDPOINT, endpoint)
+                .apply();
+    }
+}

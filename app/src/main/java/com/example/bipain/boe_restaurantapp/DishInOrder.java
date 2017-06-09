@@ -1,5 +1,7 @@
 package com.example.bipain.boe_restaurantapp;
 
+import com.example.bipain.boe_restaurantapp.model.Dish;
+
 /**
  * Created by BiPain on 6/5/2017.
  */

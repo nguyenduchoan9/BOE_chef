@@ -6,4 +6,14 @@
     <dimen name="tab_padding_bottom">16dp</dimen>
     <dimen name="tab_label">14sp</dimen>
     <dimen name="custom_tab_layout_height">72dp</dimen>
+    <dimen name="tiny_space">4dp</dimen>
+    <dimen name="small_space">8dp</dimen>
+    <dimen name="medium_space">16dp</dimen>
+    <dimen name="normal_space">24dp</dimen>
+    <dimen name="corner_small">4dp</dimen>
+    <dimen name="size_small_text">12sp</dimen>
+    <dimen name="size_x_small_text">14sp</dimen>
+    <dimen name="size_medium_text">16sp</dimen>
+    <dimen name="size_large_text">20sp</dimen>
+    <dimen name="size_x_large_text">24sp</dimen>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.bipain.boe_restaurantapp;
+package com.example.bipain.boe_restaurantapp.model;
 
 /**
  * Created by BiPain on 6/5/2017.

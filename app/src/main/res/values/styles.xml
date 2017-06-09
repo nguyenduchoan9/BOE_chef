@@ -1,7 +1,7 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="MyMaterialTheme" parent="MyMaterialTheme.Base">
+    <style name="AppTheme" parent="MyMaterialTheme.Base">
 
     </style>
 
@@ -13,4 +13,25 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MyMaterialTheme.Base.NoStatusBar" parent="MyMaterialTheme.Base">
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
+    </style>
+
+    <style name="ChefLoginButton">
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/tiny_space</item>
+        <item name="android:textSize">@dimen/size_medium_text</item>
+        <item name="android:background">@drawable/login_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
+
+    <style name="WaiterLoginButton">
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/tiny_space</item>
+        <item name="android:textSize">@dimen/size_medium_text</item>
+        <item name="android:background">@drawable/waiter_login_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
 </resources>

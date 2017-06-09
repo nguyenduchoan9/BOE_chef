@@ -1,5 +1,6 @@
-package com.example.bipain.boe_restaurantapp;
+package com.example.bipain.boe_restaurantapp.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -10,16 +11,36 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.example.bipain.boe_restaurantapp.DishInOrder;
+import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.adapter.PagerFragmentAdapter;
+import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
+import com.example.bipain.boe_restaurantapp.fragment.MenuFragment;
+import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
+import com.example.bipain.boe_restaurantapp.model.Dish;
+import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
+import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
+import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
+import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class TabManagerActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-
+    private PreferencesManager preferencesManager;
+    private EndpointManager endpointManager;
+    private Retrofit apiService;
+    private Services services;
     HashMap<Integer, ArrayList<DishInOrder>> orders;
 
     @Override
@@ -27,14 +48,19 @@ public class TabManagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tab_manager);
 
+        preferencesManager = new PreferencesManager(this, new Gson());
+        endpointManager = new EndpointManager(this);
+        apiService = new RetrofitUtils(preferencesManager, endpointManager).create();
+        services = apiService.create(Services.class);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-        setUpViewPager(viewPager);
+        viewPager.setAdapter(new PagerFragmentAdapter(getSupportFragmentManager()));
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
@@ -42,41 +68,27 @@ public class TabManagerActivity extends AppCompatActivity {
         setOrders();
     }
 
-    public void setUpViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new OrderFragment(), "ORDER");
-        adapter.addFragment(new MenuFragment(), "MENU");
-        adapter.addFragment(new DishFragment(), "DISH");
-        viewPager.setAdapter(adapter);
+    @Override
+    public boolean onSupportNavigateUp() {
+        onLogOut();
+        return true;
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> fragmentList = new ArrayList<>();
-        private final List<String> fragmentTitleList = new ArrayList<>();
+    private void onLogOut() {
+        services.logout(preferencesManager.getUser().getId()).enqueue(new Callback<SessionDeleteResponse>() {
+            @Override
+            public void onResponse(Call<SessionDeleteResponse> call, Response<SessionDeleteResponse> response) {
+                if (response.isSuccessful()) {
+                    preferencesManager.logOut();
+                    startActivity(LoginActivity.newInstance(TabManagerActivity.this));
+                }
+            }
 
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
+            @Override
+            public void onFailure(Call<SessionDeleteResponse> call, Throwable t) {
 
-        @Override
-        public Fragment getItem(int position) {
-            return fragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            fragmentList.add(fragment);
-            fragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return fragmentTitleList.get(position);
-        }
+            }
+        });
     }
 
     public HashMap<Integer, ArrayList<DishInOrder>> getOrders() {
@@ -126,5 +138,11 @@ public class TabManagerActivity extends AppCompatActivity {
         orders.put(2, orderDetail2);
         orders.put(3, orderDetail3);
         orders.put(4, orderDetail4);
+    }
+
+    public static Intent newInstance(Context context) {
+        Intent i = new Intent(context, TabManagerActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return i;
     }
 }
