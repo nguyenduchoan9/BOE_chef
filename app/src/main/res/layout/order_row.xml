@@ -1,50 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/list_selector"
-    android:orientation="horizontal"
-    android:padding="5dip">
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/list_selector"
+                android:orientation="horizontal"
+                android:padding="6dp">
 
     <TextView
+        android:id="@+id/txtOrderId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/txtOrderId"
         android:text="1"
         android:visibility="invisible"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/txtTitleNumberDish"
-        android:text="So mon: "
-        android:textSize="20dip"
-        android:textStyle="bold"
-        android:layout_marginLeft="3dp"/>
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="3dp"
+        android:text="Tong so mon: "
+        android:textSize="20dip"
+        android:textStyle="bold"/>
+
+    <TextView
         android:id="@+id/txtnumberDish"
-        android:layout_toRightOf="@id/txtTitleNumberDish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="5"
         android:textSize="20dp"
-        android:textStyle="bold"
-        android:text="5"/>
+        android:textStyle="bold"/>
+
     <TextView
         android:id="@+id/txtTitleTotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:text="So Luong: "
         android:layout_below="@+id/txtTitleNumberDish"
-        android:layout_marginLeft="3dp"/>
+        android:layout_marginLeft="3dp"
+        android:layout_marginTop="8dp"
+        android:text="Tong so luong: "
+        android:textSize="20dp"
+        android:textStyle="bold"/>
+
     <TextView
         android:id="@+id/txtTotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:text="6"
-        android:textStyle="bold"
+        android:layout_alignParentRight="true"
         android:layout_alignTop="@id/txtTitleTotal"
-        android:layout_toRightOf="@id/txtTitleTotal"/>
+        android:text="6"
+        android:textSize="20dp"
+        android:textStyle="bold"/>
 </RelativeLayout>

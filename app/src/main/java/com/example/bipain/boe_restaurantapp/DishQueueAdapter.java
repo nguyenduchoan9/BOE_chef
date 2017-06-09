@@ -46,10 +46,8 @@ public class DishQueueAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (convertView == null) {
-            view = layoutInflater.inflate(R.layout.dish_queue_row, null);
-        }
+        View view = layoutInflater.inflate(R.layout.dish_queue_row, null);
+
         TextView txtDishName = (TextView) view.findViewById(R.id.txtDishName);
         TextView txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
         DishInOrder dish = new DishInOrder();

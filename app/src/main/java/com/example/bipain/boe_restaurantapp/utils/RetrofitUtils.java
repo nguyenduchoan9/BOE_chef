@@ -23,7 +23,6 @@ public class RetrofitUtils {
         this.preferencesManager = preferencesManager;
         this.endpointManager = endpointManager;
     }
-
     public Retrofit create() {
         return new Retrofit.Builder()
                 .baseUrl(endpointManager.getEndpoint() + "/api/")
@@ -98,5 +97,4 @@ public class RetrofitUtils {
             return chain.proceed(request);
         };
     }
-
 }

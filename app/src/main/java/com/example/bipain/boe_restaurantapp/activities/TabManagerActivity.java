@@ -20,6 +20,7 @@ import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
 import com.example.bipain.boe_restaurantapp.fragment.MenuFragment;
 import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
 import com.example.bipain.boe_restaurantapp.model.Dish;
+import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
@@ -57,6 +58,22 @@ public class TabManagerActivity extends AppCompatActivity {
         endpointManager = new EndpointManager(this);
         apiService = new RetrofitUtils(preferencesManager, endpointManager).create();
         services = apiService.create(Services.class);
+
+        services.getUserProfile("abc", "id").enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if(response.isSuccessful()){
+                    if(response.body() != null){
+                        User user = response.body();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+
+            }
+        });
         queueDish = new QueueDish();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -125,10 +142,21 @@ public class TabManagerActivity extends AppCompatActivity {
         ArrayList<DishInOrder> orderDetail1 = new ArrayList<>();
         orderDetail1.add(dishInOrder1);
         orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
+        orderDetail1.add(dishInOrder2);
 
         ArrayList<DishInOrder> orderDetail2 = new ArrayList<>();
         orderDetail2.add(dishInOrder3);
         orderDetail2.add(dishInOrder4);
+        orderDetail2.add(dishInOrder5);
+        orderDetail2.add(dishInOrder5);
+        orderDetail2.add(dishInOrder5);
+        orderDetail2.add(dishInOrder5);
         orderDetail2.add(dishInOrder5);
 
         ArrayList<DishInOrder> orderDetail3 = new ArrayList<>();
@@ -137,6 +165,9 @@ public class TabManagerActivity extends AppCompatActivity {
         ArrayList<DishInOrder> orderDetail4 = new ArrayList<>();
         orderDetail4.add(dishInOrder7);
         orderDetail4.add(dishInOrder8);
+        orderDetail4.add(dishInOrder8);
+        orderDetail4.add(dishInOrder8);
+        orderDetail4.add(dishInOrder8);
         orderDetail4.add(dishInOrder9);
 
         orders = new HashMap<>();
@@ -144,6 +175,12 @@ public class TabManagerActivity extends AppCompatActivity {
         orders.put(2, orderDetail2);
         orders.put(3, orderDetail3);
         orders.put(4, orderDetail4);
+        orders.put(5, orderDetail4);
+        orders.put(6, orderDetail4);
+        orders.put(7, orderDetail4);
+        orders.put(8, orderDetail4);
+        orders.put(9, orderDetail4);
+        orders.put(10, orderDetail4);
     }
 
     public static Intent newInstance(Context context) {

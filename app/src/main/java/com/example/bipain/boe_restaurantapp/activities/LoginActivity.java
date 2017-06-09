@@ -47,12 +47,13 @@ public class LoginActivity extends AppCompatActivity {
         services = apiService.create(Services.class);
 
         btnChef.setOnClickListener(v -> {
-            loginAsChef();
-
+//            loginAsChef();
+            startActivity(TabManagerActivity.newInstance(LoginActivity.this));
         });
 
         btnWaiter.setOnClickListener(v -> {
             loginAsWaiter();
+            startActivity(LoginActivity.newInstance(LoginActivity.this));
         });
     }
 

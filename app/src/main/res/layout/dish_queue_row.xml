@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/txtDishName"
-        android:text="Spring Roll"
-        android:layout_marginStart="11dp"
-        android:layout_marginBottom="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="32dp"
+        android:layout_toLeftOf="@+id/txtQuantity"
+        android:text="Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll"
         android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_alignBaseline="@+id/btCookedDish"/>
+        android:textStyle="bold"/>
+
     <TextView
-        android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/txtQuantity"
-        android:text="4"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_alignBaseline="@+id/txtDishName"
-        android:layout_alignBottom="@+id/txtDishName"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="300dp"/>
-    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Done"
+        android:layout_alignBottom="@+id/txtDishName"
+        android:layout_alignTop="@+id/txtDishName"
+        android:layout_marginRight="40dp"
+        android:layout_toLeftOf="@+id/btCookedDish"
+        android:gravity="center"
+        android:text="x 4"
+        android:textSize="20dp"
+        android:textStyle="bold"/>
+
+    <TextView
         android:id="@+id/btCookedDish"
-        android:layout_marginStart="500dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignBottom="@+id/txtDishName"
+        android:layout_alignTop="@+id/txtDishName"
+        android:gravity="center"
+        android:text="Done"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="20dp"
+        android:textStyle="bold"/>
 </RelativeLayout>

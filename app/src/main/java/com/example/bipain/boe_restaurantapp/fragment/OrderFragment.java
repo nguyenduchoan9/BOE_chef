@@ -79,15 +79,12 @@ public class OrderFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        lvOrder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView txtOrderId = (TextView) view.findViewById(R.id.txtOrderId);
-                selectedOrderId = Integer.parseInt(txtOrderId.getText().toString());
-                Toast.makeText(view.getContext(), "OrderId is: " + selectedOrderId, Toast.LENGTH_LONG).show();
+        lvOrder.setOnItemClickListener((parent, view1, position, id) -> {
+            TextView txtOrderId = (TextView) view1.findViewById(R.id.txtOrderId);
+            selectedOrderId = Integer.parseInt(txtOrderId.getText().toString());
+            Toast.makeText(view1.getContext(), "OrderId is: " + selectedOrderId, Toast.LENGTH_LONG).show();
 
-                refreshLvDishInOrder(selectedOrderId);
-            }
+            refreshLvDishInOrder(selectedOrderId);
         });
 
         btAccepted = (Button) view.findViewById(R.id.btAccepted);

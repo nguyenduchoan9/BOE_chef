@@ -1,54 +1,74 @@
-<ScrollView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    tools:context="com.example.bipain.boe_restaurantapp.fragment.OrderFragment">
 
-    <RelativeLayout
-        xmlns:tools="http://schemas.android.com/tools"
+    <ListView
+        android:id="@+id/lvOrder"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:listSelector="@drawable/list_selector"/>
+
+    <View
+        android:id="@+id/vDivider"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/lvOrder"
+        android:background="@color/colorPrimaryDark"/>
+
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.bipain.boe_restaurantapp.fragment.OrderFragment">
+        android:layout_toRightOf="@id/vDivider"
+        android:fillViewport="true">
 
-        <ListView
-            android:id="@+id/lvOrder"
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:listSelector="@drawable/list_selector"/>
-
-        <ListView
-            android:id="@+id/lvDetail"
-            android:layout_width="wrap_content"
-            android:layout_height="300dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="7dp"
-            android:layout_toRightOf="@id/lvOrder"
-            android:listSelector="@drawable/list_selector"/>
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@id/lvOrder">
+            android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/btAccepted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="70dp"
-                android:onClick="clickToAccept"
-                android:text="Accept"/>
+            <ListView
+                android:id="@+id/lvDetail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/containerBottom"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:listSelector="@drawable/list_selector"/>
 
-            <Button
-                android:id="@+id/btReject"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="100dp"
-                android:onClick="clickToReject"
-                android:text="Reject"/>
-        </LinearLayout>
-    </RelativeLayout>
-</ScrollView>
+            <LinearLayout
+                android:id="@+id/containerBottom"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_alignParentBottom="true"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btAccepted"
+                    style="@style/AcceptButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginRight="7dp"
+                    android:layout_weight="1"
+                    android:onClick="clickToAccept"
+                    android:text="Accept"/>
+
+                <Button
+                    android:id="@+id/btReject"
+                    style="@style/RejectButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginRight="7dp"
+                    android:layout_weight="1"
+                    android:onClick="clickToReject"
+                    android:text="Reject"/>
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

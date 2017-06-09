@@ -34,4 +34,20 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
     </style>
+
+    <style name="AcceptButton">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/accept_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
+
+    <style name="RejectButton">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/reject_button</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
 </resources>
