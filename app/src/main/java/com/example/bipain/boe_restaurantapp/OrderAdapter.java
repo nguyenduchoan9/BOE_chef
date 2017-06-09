@@ -28,6 +28,10 @@ public class OrderAdapter extends BaseAdapter {
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    public void setData(ArrayList<Order> data) {
+        this.data = data;
+    }
+
     @Override
     public int getCount() {
         return data.size();
