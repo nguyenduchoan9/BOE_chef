@@ -47,7 +47,7 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
     public void onBindViewHolder(ViewHolder holder, int position) {
         WaiterNotification item = waiterNotifications.get(position);
         holder.tvDishNam.setText(item.getDish().getDishName());
-        holder.tvTableNumber.setText(item.getTableNumber());
+        holder.tvTableNumber.setText("Table No." + String.valueOf(item.getTableNumber()));
     }
 
     @Override

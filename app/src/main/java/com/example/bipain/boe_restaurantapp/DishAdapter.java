@@ -6,9 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.example.bipain.boe_restaurantapp.model.Dish;
+
 import java.util.ArrayList;
 
 /**
@@ -47,19 +49,53 @@ public class DishAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
+        ViewHolder viewHolder = null;
         if (convertView == null) {
-            view = inflater.inflate(R.layout.category_row, null);
+            convertView = inflater.inflate(R.layout.dish_menu_row, parent, false);
+            viewHolder = new ViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        TextView txtCategoryId = (TextView) view.findViewById(R.id.txtCategoryId);
-        TextView txtCategoryName = (TextView) view.findViewById(R.id.txtCategoryName);
 
         Dish dish = new Dish();
         dish = data.get(position);
-        txtCategoryId.setText(String.valueOf(dish.getCategoryId()));
-        txtCategoryName.setText(dish.getName());
+        viewHolder.txtDishId.setText(String.valueOf(dish.getCategoryId()));
+        viewHolder.txtDishName.setText(dish.getName());
 
-        return view;
+        Dish finalDish = dish;
+        viewHolder.ckbDishIsAble.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onCheckBoxListener(finalDish.getDishId());
+            }
+        });
+        return convertView;
+    }
+
+    class ViewHolder {
+        public TextView txtDishId;
+        public TextView txtDishName;
+        public CheckBox ckbDishIsAble;
+
+        private void intialView(View view) {
+            txtDishId = (TextView) view.findViewById(R.id.txtDishId);
+            txtDishName = (TextView) view.findViewById(R.id.txtDishName);
+            ckbDishIsAble = (CheckBox) view.findViewById(R.id.ckbDishIsAble);
+        }
+
+        public ViewHolder(View view) {
+            intialView(view);
+        }
+    }
+
+    public interface DishAdaprerListener {
+        void onCheckBoxListener(int dishId);
+    }
+
+    private DishAdaprerListener listener;
+
+    public void setListener(DishAdaprerListener listener) {
+        this.listener = listener;
     }
 }

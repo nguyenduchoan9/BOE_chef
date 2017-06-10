@@ -1,5 +1,6 @@
 package com.example.bipain.boe_restaurantapp.fragment;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,17 +12,21 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.bipain.boe_restaurantapp.DishInOrder;
-import com.example.bipain.boe_restaurantapp.DishInQueue;
-import com.example.bipain.boe_restaurantapp.QueueDish;
+import com.example.bipain.boe_restaurantapp.QueueOrder;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.TabManagerActivity;
 import com.example.bipain.boe_restaurantapp.adapter.OrderAdapter;
 import com.example.bipain.boe_restaurantapp.adapter.OrderDetailAdapter;
-import com.example.bipain.boe_restaurantapp.model.Order;
+import com.example.bipain.boe_restaurantapp.model.StatusResponse;
+import com.example.bipain.boe_restaurantapp.services.Services;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderFragment extends Fragment {
 
@@ -29,38 +34,30 @@ public class OrderFragment extends Fragment {
     private ListView lvDetail;
     private OrderAdapter orderAdapter;
     private OrderDetailAdapter orderDetailAdapter;
-    private View view;
     private Button btAccepted;
     private Button btRejected;
 
-    HashMap<Integer, ArrayList<DishInOrder>> orders;
-    ArrayList<Order> orderArrayList;
-    ArrayList<DishInOrder> dishInOrderArrayList;
-    QueueDish queueDish;
-    int selectedOrderId;
+    private LinkedList<QueueOrder> orders;
+    private ArrayList<DishInOrder> dishInOrderArrayList;
+    private int selectedOrderId;
+    private View preView = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        queueDish = new QueueDish();
+        orders = new LinkedList<>();
+        dishInOrderArrayList = new ArrayList<>();
+        //setOrderArrayList();
+        orderAdapter = new OrderAdapter(getActivity(), orders);
 
-        if (orders == null) {
-            orders = new HashMap<>();
+        if(0 < orders.size()){
+            dishInOrderArrayList = orders.getFirst().getOrderDetail();
+            orderDetailAdapter = new OrderDetailAdapter(getActivity(), dishInOrderArrayList);
+        }else{
+            orderDetailAdapter = new OrderDetailAdapter(getActivity(), new ArrayList<>());
         }
-        orders = ((TabManagerActivity) this.getActivity()).getOrders();
-        setOrderArrayList();
-        orderAdapter = new OrderAdapter(getActivity(), orderArrayList);
 
-        if (dishInOrderArrayList == null) {
-            dishInOrderArrayList = new ArrayList<>();
-        }
-        dishInOrderArrayList = orders.get(orderArrayList.get(0).getOrderId());
-        orderDetailAdapter = new OrderDetailAdapter(getActivity(), dishInOrderArrayList);
-    }
-
-    public void setQueueDish() {
-        ((TabManagerActivity) this.getActivity()).setQueueDish(queueDish);
     }
 
     @Override
@@ -79,67 +76,129 @@ public class OrderFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        lvOrder.setOnItemClickListener((parent, view1, position, id) -> {
-            TextView txtOrderId = (TextView) view1.findViewById(R.id.txtOrderId);
-            selectedOrderId = Integer.parseInt(txtOrderId.getText().toString());
-            Toast.makeText(view1.getContext(), "OrderId is: " + selectedOrderId, Toast.LENGTH_LONG).show();
+        lvOrder.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView txtOrderId = (TextView) view.findViewById(R.id.txtOrderId);
+                selectedOrderId = Integer.parseInt(txtOrderId.getText().toString());
+                Toast.makeText(getActivity(), "OrderId:" + selectedOrderId, Toast.LENGTH_SHORT).show();
 
-            refreshLvDishInOrder(selectedOrderId);
+                if (preView != null) {
+                    TextView txtTitleNumberDish = (TextView) preView.findViewById(R.id.txtTitleNumberDish);
+                    TextView txtnumberDish = (TextView) preView.findViewById(R.id.txtnumberDish);
+                    TextView txtTitleTotal = (TextView) preView.findViewById(R.id.txtTitleTotal);
+                    TextView txtTotal = (TextView) preView.findViewById(R.id.txtTotal);
+
+                    preView.setBackgroundColor(Color.WHITE);
+                    txtnumberDish.setTextColor(Color.BLACK);
+                    txtTitleNumberDish.setTextColor(Color.BLACK);
+                    txtTitleTotal.setTextColor(Color.BLACK);
+                    txtTotal.setTextColor(Color.BLACK);
+                }
+                preView = view;
+
+                refreshLvDishInOrder();
+
+                TextView txtTitleNumberDish = (TextView) view.findViewById(R.id.txtTitleNumberDish);
+                TextView txtnumberDish = (TextView) view.findViewById(R.id.txtnumberDish);
+                TextView txtTitleTotal = (TextView) view.findViewById(R.id.txtTitleTotal);
+                TextView txtTotal = (TextView) view.findViewById(R.id.txtTotal);
+
+                view.setBackgroundColor(Color.BLACK);
+                txtnumberDish.setTextColor(Color.WHITE);
+                txtTitleNumberDish.setTextColor(Color.WHITE);
+                txtTitleTotal.setTextColor(Color.WHITE);
+                txtTotal.setTextColor(Color.WHITE);
+            }
         });
 
         btAccepted = (Button) view.findViewById(R.id.btAccepted);
         btAccepted.setOnClickListener(v -> {
-            ArrayList<DishInOrder> dishInOrders = orders.get(selectedOrderId);
-            for (DishInOrder dish : dishInOrders) {
-                for (int i = 0; i < dish.getQuantity(); i++) {
-                    DishInQueue dishInQueue = new DishInQueue();
-                    dishInQueue.setOrderId(selectedOrderId);
-                    dishInQueue.setDish(dish.getDish());
-                    queueDish.addDishInQueue(dishInQueue);
-                }
-            }
-            removeOrder(selectedOrderId);
-            setQueueDish();
+            removeOrder(0);
         });
 
         btRejected = (Button) view.findViewById(R.id.btReject);
-        btRejected.setOnClickListener(v -> removeOrder(selectedOrderId));
+        btRejected.setOnClickListener(v -> removeOrder(1));
     }
 
-    public void setOrderArrayList() {
-        if (orderArrayList == null) {
-            orderArrayList = new ArrayList<>();
+    public void removeOrder(int branch) {
+        Services services = getServices();
+        if (0 == branch) {
+            services.markOrderAccept(selectedOrderId).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            refreshView();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+                }
+            });
+        } else if (1 == branch) {
+            services.markOrderReject(selectedOrderId).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            refreshView();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+                }
+            });
         }
-        for (Map.Entry<Integer, ArrayList<DishInOrder>> entry : orders.entrySet()) {
-            int orderId = entry.getKey();
-            int numberDish = 0;
-            int total = 0;
-            ArrayList<DishInOrder> dishInOrders = entry.getValue();
-            for (DishInOrder dishInOrder : dishInOrders) {
-                numberDish += 1;
-                total += dishInOrder.getQuantity();
+
+    }
+
+    private void refreshView() {
+        for (QueueOrder queueOrder : orders) {
+            if (queueOrder.getOrderId() == selectedOrderId) {
+                orders.remove(queueOrder);
+                break;
             }
-            Order order = new Order(numberDish, total, orderId);
-            orderArrayList.add(order);
         }
-    }
-
-    public void removeOrder(int orderId) {
-        orders.remove(orderId);
-        setOrderArrayList();
-        orderAdapter.setData(orderArrayList);
+        orderAdapter.setData(orders);
         lvOrder.setAdapter(orderAdapter);
         orderAdapter.notifyDataSetChanged();
         lvOrder.invalidateViews();
 
-        refreshLvDishInOrder(orderId);
+        if(null != orders && orders.size() > 0){
+            dishInOrderArrayList = orders.getFirst().getOrderDetail();
+            orderDetailAdapter.setData(dishInOrderArrayList);
+        }else {
+            orderDetailAdapter.setData(new ArrayList<>());
+        }
+        lvDetail.setAdapter(orderDetailAdapter);
+        orderDetailAdapter.notifyDataSetChanged();
+        lvDetail.invalidateViews();
     }
 
-    public void refreshLvDishInOrder(int orderId) {
-        dishInOrderArrayList = orders.get(selectedOrderId);
+    public void refreshLvDishInOrder() {
+        for (QueueOrder queueOrder : orders) {
+            if (queueOrder.getOrderId() == selectedOrderId) {
+                dishInOrderArrayList = queueOrder.getOrderDetail();
+            }
+        }
         orderDetailAdapter.setData(dishInOrderArrayList);
         lvDetail.setAdapter(orderDetailAdapter);
         orderDetailAdapter.notifyDataSetChanged();
         lvDetail.invalidateViews();
+    }
+
+    public void addOrder(QueueOrder queueOrder) {
+        orderAdapter.addData(queueOrder);
+    }
+
+    public Services getServices() {
+        return ((TabManagerActivity) getActivity()).getServices();
     }
 }

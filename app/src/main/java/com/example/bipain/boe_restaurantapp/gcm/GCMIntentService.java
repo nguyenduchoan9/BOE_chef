@@ -13,20 +13,24 @@ import com.google.gson.Gson;
 
 public class GCMIntentService extends GcmListenerService {
     public static final String MESSAGE_TO_DINER = "MESSAGE_TO_DINER";
-    public static final String MESSAGE_TO_CHEF = "MESSAGE_TO_CHEF";
+    public static final String MESSAGE_TO_CHEF_ORDER = "MESSAGE_TO_CHEF_ORDER";
+    public static final String MESSAGE_TO_CHEF_DISH = "MESSAGE_TO_CHEF_DISH";
     public static final String MESSAGE_TO_WAITER = "MESSAGE_TO_WAITER";
 
     @Override
     public void onMessageReceived(String string, Bundle data) {
         String to = data.getString("to");
         String body = data.getString("body");
-        Gson gson = new Gson();
-        TestObject object = gson.fromJson(body, TestObject.class);
 
         if ("diner".equals(to)) {
             sendMessageToDiner(body);
         } else if ("chef".equals(to)) {
-            sendMessageToChef(body);
+            String term = data.getString("term");
+            if ("order".equals(term)) {
+                sendMessageToChefOrder(body);
+            } else if ("dish".equals(term)) {
+                sendMessageToChefDish(body);
+            }
         } else if ("waiter".equals(to)) {
             sendMessageToWaiter(body);
         }
@@ -38,8 +42,14 @@ public class GCMIntentService extends GcmListenerService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }
 
-    private void sendMessageToChef(String message) {
-        Intent i = new Intent(MESSAGE_TO_CHEF);
+    private void sendMessageToChefOrder(String message) {
+        Intent i = new Intent(MESSAGE_TO_CHEF_ORDER);
+        i.putExtra("body", message);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+    }
+
+    private void sendMessageToChefDish(String message) {
+        Intent i = new Intent(MESSAGE_TO_CHEF_DISH);
         i.putExtra("body", message);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }

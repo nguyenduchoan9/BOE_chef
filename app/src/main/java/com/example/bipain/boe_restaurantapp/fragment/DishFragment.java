@@ -4,39 +4,43 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.example.bipain.boe_restaurantapp.DishInOrder;
 import com.example.bipain.boe_restaurantapp.DishInQueue;
 import com.example.bipain.boe_restaurantapp.DishQueueAdapter;
-import com.example.bipain.boe_restaurantapp.QueueDish;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.TabManagerActivity;
-import android.widget.Button;
-import android.widget.CheckBox;
+import com.example.bipain.boe_restaurantapp.model.StatusResponse;
+import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
+
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DishFragment extends Fragment {
 
     private ListView lvDishInQueue;
     private DishQueueAdapter dishQueueAdapter;
-    QueueDish queueDish;
-    ArrayList<DishInOrder> dishInOrders;
+    private LinkedList<DishInQueue> queueDish;
+    private ArrayList<DishInOrder> dishInOrders;
 
     View view;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        queueDish = new QueueDish();
-        queueDish = ((TabManagerActivity) this.getActivity()).getQueueDish();
+        queueDish = new LinkedList<>();
         dishInOrders = new ArrayList<>();
         setDishInOrders();
         dishQueueAdapter = new DishQueueAdapter(getActivity(), dishInOrders);
@@ -56,50 +60,87 @@ public class DishFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        lvDishInQueue.setOnContextClickListener(v -> {
-//            CheckBox ckbDishIsCooked = (CheckBox) v.findViewById(R.id.ckbQueueDish);
-//            if (ckbDishIsCooked.isChecked()) {
-//                TextView txtDishId = (TextView) v.findViewById(R.id.txtDishId);
-//                int distId = Integer.parseInt(txtDishId.getText().toString());
-//                for (DishInQueue dishInQueue : queueDish.getQueues()) {
-//                    if (dishInQueue.getDish().getDishId() == distId) {
-//                        queueDish.getQueues().remove(dishInQueue);
-//
-//                        refreshListViewDish();
-//
-//                        return true;
-//                    }
-//                }
-//            }
-//            return false;
-//        });
+        dishQueueAdapter.setListener(dishId -> {
+            Services services = getService();
+            int orderId = getOrderIdByDish(dishId);
+            services.markDishDone(orderId, dishId).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            removeDishIsCooked(dishId);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+                }
+            });
+        });
     }
 
     public void setDishInOrders() {
-        QueueDish temp = new QueueDish();
-        temp = queueDish;
-        for (DishInQueue dishInQueue : temp.getQueues()) {
-            int i = 1;
-            DishInOrder dishInOrder = new DishInOrder();
-            dishInOrder.setDish(dishInQueue.getDish());
-            for (DishInQueue diq : queueDish.getQueues()) {
-                if (diq.getDish().getDishId() == dishInQueue.getDish().getDishId()) {
-                    i += 1;
-                    temp.getQueues().remove(diq);
+        if(null != queueDish && queueDish.size() >0){
+            for (DishInQueue dishInQueue : queueDish) {
+                int quantity = 0;
+                DishInOrder dishInOrder = new DishInOrder();
+                dishInOrder.setDish(dishInQueue.getDish());
+                boolean isExited = false;
+                for (DishInOrder dish : dishInOrders) {
+                    if (dish.getDish().getDishId() == dishInOrder.getDish().getDishId()) {
+                        isExited = true;
+                        break;
+                    }
+                }
+                if (!isExited) {
+                    for (DishInQueue dish : queueDish) {
+                        if (dish.getDish().getDishId() == dishInOrder.getDish().getDishId()) {
+                            quantity += 1;
+                        }
+                    }
+                    dishInOrder.setQuantity(quantity);
+                    dishInOrders.add(dishInOrder);
                 }
             }
-            temp.getQueues().remove(dishInQueue);
-            dishInOrder.setQuantity(i);
-
-            dishInOrders.add(dishInOrder);
         }
     }
 
     public void refreshListViewDish() {
+        dishInOrders.clear();
         setDishInOrders();
+//        lvDishInQueue.setAdapter(dishQueueAdapter);
         dishQueueAdapter.setData(dishInOrders);
-        lvDishInQueue.setAdapter(dishQueueAdapter);
         dishQueueAdapter.notifyDataSetChanged();
-        lvDishInQueue.invalidateViews();
+//        lvDishInQueue.invalidateViews();
+    }
+
+    private int getOrderIdByDish(int dishId) {
+        for (DishInQueue dishInQueue : queueDish) {
+            if (dishInQueue.getDish().getDishId() == dishId) {
+                return dishInQueue.getOrderId();
+            }
+        }
+        return 0;
+    }
+
+    public void removeDishIsCooked(int dishId) {
+        for (DishInQueue dishInQueue : queueDish) {
+            if (dishInQueue.getDish().getDishId() == dishId) {
+                queueDish.remove(dishInQueue);
+                break;
+            }
+        }
+        refreshListViewDish();
+    }
+
+    public void addNewQueue(DishInQueue queue) {
+        queueDish.add(queue);
+        refreshListViewDish();
+    }
+
+    public Services getService() {
+        return ((TabManagerActivity) getActivity()).getServices();
     }
 }

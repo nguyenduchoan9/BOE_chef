@@ -1,11 +1,15 @@
 package com.example.bipain.boe_restaurantapp.model;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by BiPain on 6/5/2017.
  */
 
 public class Dish {
+    @SerializedName("dish_id")
     private int dishId;
+    @SerializedName("dish_name")
     private String name;
     private int categoryId;
 

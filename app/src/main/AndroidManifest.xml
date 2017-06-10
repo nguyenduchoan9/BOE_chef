@@ -67,8 +67,9 @@
             android:name=".activities.LoginActivity"
             android:screenOrientation="landscape"
             android:theme="@style/MyMaterialTheme.Base.NoStatusBar"/>
-        <activity android:name=".activities.WaiterActivity">
-        </activity>
+        <activity
+            android:name=".activities.WaiterActivity"
+            android:screenOrientation="landscape"/>
     </application>
 
 </manifest>

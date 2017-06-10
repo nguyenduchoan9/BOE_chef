@@ -150,6 +150,6 @@ public class WaiterActivity extends AppCompatActivity {
     }
 
     private void setTotal() {
-        tvTotal.setText(String.valueOf(mAdapter.getItemCount()));
+        tvTotal.setText("Tong so: " + String.valueOf(mAdapter.getItemCount()));
     }
 }

@@ -56,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
             btnWaiter.setOnClickListener(v -> {
                 loginAsWaiter();
+
 //                startActivity(WaiterActivity.newInstance(LoginActivity.this));
             });
         }
