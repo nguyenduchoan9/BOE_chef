@@ -4,21 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.example.bipain.boe_restaurantapp.Category;
 import com.example.bipain.boe_restaurantapp.DishInOrder;
-import com.example.bipain.boe_restaurantapp.QueueDish;
+import com.example.bipain.boe_restaurantapp.DishInQueue;
+import com.example.bipain.boe_restaurantapp.QueueOrder;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.adapter.PagerFragmentAdapter;
-import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
-import com.example.bipain.boe_restaurantapp.fragment.MenuFragment;
-import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
 import com.example.bipain.boe_restaurantapp.model.Dish;
 import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
@@ -27,9 +22,11 @@ import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,10 +41,10 @@ public class TabManagerActivity extends AppCompatActivity {
     private EndpointManager endpointManager;
     private Retrofit apiService;
     private Services services;
-    HashMap<Integer, ArrayList<DishInOrder>> orders;
-    QueueDish queueDish;
-    ArrayList<Category> categories = new ArrayList<>();
-    ArrayList<Dish> dishes = new ArrayList<>();
+    private LinkedList<QueueOrder> orders;
+    private LinkedList<DishInQueue> queueDish;
+    private ArrayList<Category> categories = new ArrayList<>();
+    private ArrayList<Dish> dishes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +59,8 @@ public class TabManagerActivity extends AppCompatActivity {
         services.getUserProfile("abc", "id").enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                if(response.isSuccessful()){
-                    if(response.body() != null){
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
                         User user = response.body();
                     }
                 }
@@ -74,7 +71,10 @@ public class TabManagerActivity extends AppCompatActivity {
 
             }
         });
-        queueDish = new QueueDish();
+        queueDish = new LinkedList<>();
+        orders = new LinkedList<>();
+        categories = new ArrayList<>();
+        dishes = new ArrayList<>();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,6 +89,9 @@ public class TabManagerActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
 
         setOrders();
+        setQueueDish();
+        setCategories();
+        setDishes();
     }
 
     @Override
@@ -114,7 +117,7 @@ public class TabManagerActivity extends AppCompatActivity {
         });
     }
 
-    public HashMap<Integer, ArrayList<DishInOrder>> getOrders() {
+    public LinkedList<QueueOrder> getOrders() {
         return orders;
     }
 
@@ -142,21 +145,10 @@ public class TabManagerActivity extends AppCompatActivity {
         ArrayList<DishInOrder> orderDetail1 = new ArrayList<>();
         orderDetail1.add(dishInOrder1);
         orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
-        orderDetail1.add(dishInOrder2);
 
         ArrayList<DishInOrder> orderDetail2 = new ArrayList<>();
         orderDetail2.add(dishInOrder3);
         orderDetail2.add(dishInOrder4);
-        orderDetail2.add(dishInOrder5);
-        orderDetail2.add(dishInOrder5);
-        orderDetail2.add(dishInOrder5);
-        orderDetail2.add(dishInOrder5);
         orderDetail2.add(dishInOrder5);
 
         ArrayList<DishInOrder> orderDetail3 = new ArrayList<>();
@@ -165,23 +157,82 @@ public class TabManagerActivity extends AppCompatActivity {
         ArrayList<DishInOrder> orderDetail4 = new ArrayList<>();
         orderDetail4.add(dishInOrder7);
         orderDetail4.add(dishInOrder8);
-        orderDetail4.add(dishInOrder8);
-        orderDetail4.add(dishInOrder8);
-        orderDetail4.add(dishInOrder8);
         orderDetail4.add(dishInOrder9);
 
-        orders = new HashMap<>();
-        orders.put(1, orderDetail1);
-        orders.put(2, orderDetail2);
-        orders.put(3, orderDetail3);
-        orders.put(4, orderDetail4);
-        orders.put(5, orderDetail4);
-        orders.put(6, orderDetail4);
-        orders.put(7, orderDetail4);
-        orders.put(8, orderDetail4);
-        orders.put(9, orderDetail4);
-        orders.put(10, orderDetail4);
+        orders = new LinkedList<>();
+        QueueOrder queueOrder1 = new QueueOrder(1, 2, 2, orderDetail1);
+        QueueOrder queueOrder2 = new QueueOrder(2, 3, 6, orderDetail2);
+        QueueOrder queueOrder3 = new QueueOrder(3, 1, 3, orderDetail3);
+        QueueOrder queueOrder4 = new QueueOrder(4, 2, 5, orderDetail4);
+        orders.add(queueOrder1);
+        orders.add(queueOrder2);
+        orders.add(queueOrder3);
+        orders.add(queueOrder4);
     }
+
+    public void setQueueDish() {
+        Dish dish1 = new Dish(1, "Vit Quay Bac Kinh", 1);
+        Dish dish2 = new Dish(2, "Ngheu xao sa ot", 1);
+        Dish dish3 = new Dish(3, "Oc quan xao dua", 1);
+        Dish dish4 = new Dish(4, "Be Thui Cau Mong", 1);
+        Dish dish5 = new Dish(5, "Banh trang cuon thit heo 2 dau da", 1);
+        Dish dish6 = new Dish(6, "De Nuong Nam Dinh", 1);
+        Dish dish7 = new Dish(7, "Ga deo le gion cay", 1);
+        Dish dish8 = new Dish(8, "Muc ham ruou sa ke", 1);
+        Dish dish9 = new Dish(9, "Vit Tiem thuoc bac", 1);
+
+        DishInQueue dishInQueue = new DishInQueue(dish1, 1);
+        DishInQueue dishInQueue1 = new DishInQueue(dish2, 1);
+        DishInQueue dishInQueue2 = new DishInQueue(dish3, 1);
+        DishInQueue dishInQueue3 = new DishInQueue(dish3, 2);
+        DishInQueue dishInQueue4 = new DishInQueue(dish4, 2);
+        DishInQueue dishInQueue5 = new DishInQueue(dish4, 2);
+        DishInQueue dishInQueue6 = new DishInQueue(dish7, 3);
+        DishInQueue dishInQueue7 = new DishInQueue(dish3, 3);
+
+        queueDish.add(dishInQueue);
+        queueDish.add(dishInQueue1);
+        queueDish.add(dishInQueue2);
+        queueDish.add(dishInQueue3);
+        queueDish.add(dishInQueue4);
+        queueDish.add(dishInQueue5);
+        queueDish.add(dishInQueue6);
+        queueDish.add(dishInQueue7);
+    }
+
+    public void setCategories() {
+        Category category = new Category(1, "Mon Xao");
+        Category category1 = new Category(2, "Mon Canh");
+        Category category2 = new Category(3, "Mon Khai Vi");
+        Category category3 = new Category(4, "Mon Rau");
+        categories.add(category);
+        categories.add(category1);
+        categories.add(category2);
+        categories.add(category3);
+    }
+
+    public void setDishes() {
+        Dish dish1 = new Dish(1, "Vit Quay Bac Kinh", 1);
+        Dish dish2 = new Dish(2, "Ngheu xao sa ot", 1);
+        Dish dish3 = new Dish(3, "Oc quan xao dua", 1);
+        Dish dish4 = new Dish(4, "Be Thui Cau Mong", 2);
+        Dish dish5 = new Dish(5, "Banh trang cuon thit heo 2 dau da", 2);
+        Dish dish6 = new Dish(6, "De Nuong Nam Dinh", 3);
+        Dish dish7 = new Dish(7, "Ga deo le gion cay", 3);
+        Dish dish8 = new Dish(8, "Muc ham ruou sa ke", 3);
+        Dish dish9 = new Dish(9, "Vit Tiem thuoc bac", 4);
+
+        dishes.add(dish1);
+        dishes.add(dish2);
+        dishes.add(dish3);
+        dishes.add(dish4);
+        dishes.add(dish5);
+        dishes.add(dish6);
+        dishes.add(dish7);
+        dishes.add(dish8);
+        dishes.add(dish9);
+    }
+
 
     public static Intent newInstance(Context context) {
         Intent i = new Intent(context, TabManagerActivity.class);
@@ -205,11 +256,11 @@ public class TabManagerActivity extends AppCompatActivity {
         this.dishes = dishes;
     }
 
-    public QueueDish getQueueDish() {
+    public LinkedList<DishInQueue> getQueueDish() {
         return queueDish;
     }
 
-    public void setQueueDish(QueueDish queueDish) {
+    public void setQueueDish(LinkedList<DishInQueue> queueDish) {
         this.queueDish = queueDish;
     }
 }

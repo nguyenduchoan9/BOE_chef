@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="16dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtDishId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/txtDishName"
@@ -13,7 +20,7 @@
         android:layout_toLeftOf="@+id/txtQuantity"
         android:text="Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll"
         android:textSize="20dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/txtQuantity"
@@ -26,18 +33,18 @@
         android:gravity="center"
         android:text="x 4"
         android:textSize="20dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/btCookedDish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/txtDishName"
+        android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/txtDishName"
         android:gravity="center"
         android:text="Done"
         android:textColor="@android:color/holo_red_light"
         android:textSize="20dp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 </RelativeLayout>

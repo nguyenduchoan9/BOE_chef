@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="5dp">
 
     <TextView
         android:layout_width="wrap_content"
@@ -18,24 +20,14 @@
         android:layout_marginBottom="30dp"
         android:textSize="20dp"
         android:textStyle="bold"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/txtNumber"
-        android:text="4"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_alignBaseline="@+id/txtDishName"
-        android:layout_alignBottom="@+id/txtDishName"
-        android:layout_toEndOf="@+id/txtDishName"
-        android:layout_marginStart="200dp"/>
+
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/ckbQueueDish"
-        android:checked="false"
-        android:layout_toEndOf="@+id/txtTotal"
-        android:layout_marginStart="500dp"
-        android:layout_alignBaseline="@id/txtNumber"
+        android:id="@+id/ckbDishIsAble"
+        android:checked="true"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignBaseline="@id/txtDishName"
         android:background="@color/colorPrimaryDark"/>
 </RelativeLayout>

@@ -26,5 +26,4 @@ public interface Services {
     @POST("session/{id}")
     @FormUrlEncoded
     Call<User> getUserProfile(@Field("username") String username, @Path("id") String id);
-
 }

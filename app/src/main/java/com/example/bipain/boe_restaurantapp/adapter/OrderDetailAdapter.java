@@ -9,8 +9,11 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.example.bipain.boe_restaurantapp.DishInOrder;
+import com.example.bipain.boe_restaurantapp.QueueOrder;
 import com.example.bipain.boe_restaurantapp.R;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by BiPain on 6/5/2017.

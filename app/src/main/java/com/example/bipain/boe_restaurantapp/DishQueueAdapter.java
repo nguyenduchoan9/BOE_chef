@@ -46,16 +46,58 @@ public class DishQueueAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = layoutInflater.inflate(R.layout.dish_queue_row, null);
+        ViewHolder viewlHolder = null;
+        if (null == convertView) {
+            convertView = layoutInflater.inflate(R.layout.dish_queue_row, parent, false);
+            viewlHolder = new ViewHolder(convertView);
+            convertView.setTag(viewlHolder);
+        } else {
+            viewlHolder = (ViewHolder) convertView.getTag();
+        }
 
-        TextView txtDishName = (TextView) view.findViewById(R.id.txtDishName);
-        TextView txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
+
         DishInOrder dish = new DishInOrder();
         dish = data.get(position);
 
-        txtDishName.setText(dish.getDish().getName());
-        txtQuantity.setText(String.valueOf(dish.getQuantity()));
+        viewlHolder.txtDishName.setText(dish.getDish().getName());
+        viewlHolder.txtQuantity.setText(String.valueOf(dish.getQuantity()));
+        viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
+        DishInOrder finalDish = dish;
+        viewlHolder.btDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onDoneClick(finalDish.getDish().getDishId());
+            }
+        });
 
-        return view;
+        return convertView;
+    }
+
+    class ViewHolder {
+        public TextView txtDishName;
+        public TextView txtQuantity;
+        public TextView txtDishId;
+        public TextView btDone;
+
+        public ViewHolder(View v) {
+            initView(v);
+        }
+
+        private void initView(View view) {
+            txtDishName = (TextView) view.findViewById(R.id.txtDishName);
+            txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
+            txtDishId = (TextView) view.findViewById(R.id.txtDishId);
+            btDone = (TextView) view.findViewById(R.id.btCookedDish);
+        }
+    }
+
+    public interface DishQueueAdapterListener {
+        void onDoneClick(int dishId);
+    }
+
+    private DishQueueAdapterListener listener;
+
+    public void setListener(DishQueueAdapterListener listener) {
+        this.listener = listener;
     }
 }

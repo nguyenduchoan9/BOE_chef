@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.example.bipain.boe_restaurantapp.QueueOrder;
 import com.example.bipain.boe_restaurantapp.model.Order;
 import com.example.bipain.boe_restaurantapp.R;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by BiPain on 6/4/2017.
@@ -18,16 +20,16 @@ import java.util.ArrayList;
 
 public class OrderAdapter extends BaseAdapter {
     private Activity activity;
-    private ArrayList<Order> data;
+    private LinkedList<QueueOrder> data;
     private static LayoutInflater inflater = null;
 
-    public OrderAdapter(Activity activity, ArrayList<Order> data) {
+    public OrderAdapter(Activity activity, LinkedList<QueueOrder> data) {
         this.activity = activity;
         this.data = data;
         inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    public void setData(ArrayList<Order> data) {
+    public void setData(LinkedList<QueueOrder> data) {
         this.data = data;
     }
 
@@ -56,12 +58,12 @@ public class OrderAdapter extends BaseAdapter {
         TextView txtTotal = (TextView) view.findViewById(R.id.txtTotal);
         TextView txtOrderId = (TextView) view.findViewById(R.id.txtOrderId);
 
-        Order order = new Order();
-        order = data.get(position);
+        QueueOrder queueOrder = new QueueOrder();
+        queueOrder = data.get(position);
 
-        txtNumberDish.setText(String.valueOf(order.getNumberDish()));
-        txtTotal.setText(String.valueOf(order.getTotal()));
-        txtOrderId.setText(String.valueOf(order.getOrderId()));
+        txtNumberDish.setText(String.valueOf(queueOrder.getNumberDish()));
+        txtTotal.setText(String.valueOf(queueOrder.getTotal()));
+        txtOrderId.setText(String.valueOf(queueOrder.getOrderId()));
 
         return view;
     }

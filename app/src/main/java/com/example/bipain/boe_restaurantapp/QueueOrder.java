@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 public class QueueOrder {
     private int orderId;
+    private int numberDish;
+    private int total;
     private ArrayList<DishInOrder> orderDetail;
 
     public QueueOrder(int orderId, ArrayList<DishInOrder> orderDetail) {
@@ -15,7 +17,30 @@ public class QueueOrder {
         this.orderDetail = orderDetail;
     }
 
+    public QueueOrder(int orderId, int numberDish, int total, ArrayList<DishInOrder> orderDetail) {
+        this.orderId = orderId;
+        this.numberDish = numberDish;
+        this.total = total;
+        this.orderDetail = orderDetail;
+    }
+
     public QueueOrder() {
+    }
+
+    public int getNumberDish() {
+        return numberDish;
+    }
+
+    public void setNumberDish(int numberDish) {
+        this.numberDish = numberDish;
+    }
+
+    public int getTotal() {
+        return total;
+    }
+
+    public void setTotal(int total) {
+        this.total = total;
     }
 
     public int getOrderId() {
