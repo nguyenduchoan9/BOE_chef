@@ -4,6 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="8dp"
     tools:context="com.example.bipain.boe_restaurantapp.activities.WaiterActivity">
 
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:text="Total: 10"
+        android:textColor="@color/colorTextNavigation"
+        android:textSize="@dimen/size_medium_text"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvDish"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tvTotal"
+        android:layout_marginTop="4dp"/>
 </RelativeLayout>

@@ -1,15 +1,19 @@
 package com.example.bipain.boe_restaurantapp.activities;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.example.bipain.boe_restaurantapp.Category;
 import com.example.bipain.boe_restaurantapp.DishInOrder;
@@ -19,13 +23,17 @@ import com.example.bipain.boe_restaurantapp.adapter.PagerFragmentAdapter;
 import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
 import com.example.bipain.boe_restaurantapp.fragment.MenuFragment;
 import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
+import com.example.bipain.boe_restaurantapp.gcm.GCMIntentService;
+import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
 import com.example.bipain.boe_restaurantapp.model.Dish;
 import com.example.bipain.boe_restaurantapp.model.User;
+import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
+import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +44,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 public class TabManagerActivity extends AppCompatActivity {
-
+    private BroadcastReceiver mBroadcastReceiver;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -44,8 +52,8 @@ public class TabManagerActivity extends AppCompatActivity {
     private EndpointManager endpointManager;
     private Retrofit apiService;
     private Services services;
-    HashMap<Integer, ArrayList<DishInOrder>> orders;
-    QueueDish queueDish;
+    HashMap<Integer, ArrayList<DishInOrder>> orders = new HashMap<>();
+    QueueDish queueDish = new QueueDish();
     ArrayList<Category> categories = new ArrayList<>();
     ArrayList<Dish> dishes = new ArrayList<>();
 
@@ -59,21 +67,8 @@ public class TabManagerActivity extends AppCompatActivity {
         apiService = new RetrofitUtils(preferencesManager, endpointManager).create();
         services = apiService.create(Services.class);
 
-        services.getUserProfile("abc", "id").enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if(response.isSuccessful()){
-                    if(response.body() != null){
-                        User user = response.body();
-                    }
-                }
-            }
+        setBroadcastReceiver();
 
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-
-            }
-        });
         queueDish = new QueueDish();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -211,5 +206,70 @@ public class TabManagerActivity extends AppCompatActivity {
 
     public void setQueueDish(QueueDish queueDish) {
         this.queueDish = queueDish;
+    }
+
+    private final static String GCM_TOKEN = "GCM_TOKEN";
+
+    protected void setBroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().endsWith(GCMRegistrationIntentService.REGISTRATION_SUCCESS)) {
+                    String token = intent.getStringExtra("token");
+                    services.registerRegToken(token).enqueue(new Callback<NotificationResponse>() {
+                        @Override
+                        public void onResponse(Call<NotificationResponse> call, Response<NotificationResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (null != response.body()) {
+                                    Log.v("GCM-register", "Success");
+                                    ToastUtils.toastLongMassage(TabManagerActivity.this,
+                                            "reg token is sucess");
+                                }
+                            } else {
+                                Log.v("GCM-register", "fail");
+                                ToastUtils.toastLongMassage(TabManagerActivity.this,
+                                        "reg token is fail");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<NotificationResponse> call, Throwable t) {
+
+                        }
+                    });
+                    Log.v(GCM_TOKEN, token);
+                } else if (intent.getAction().endsWith(GCMRegistrationIntentService.REGISTRATION_ERROR)) {
+                    ToastUtils.toastLongMassage(TabManagerActivity.this,
+                            "GCM registration error");
+                } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_CHEF)) {
+                    String message = intent.getStringExtra("body");
+                    ToastUtils.toastLongMassage(TabManagerActivity.this,
+                            "chef-" + message);
+                } else {
+                    ToastUtils.toastShortMassage(getApplicationContext(), "Nothing");
+                }
+            }
+        };
+
+        Intent intent = new Intent(getApplicationContext(), GCMRegistrationIntentService.class);
+        startService(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_SUCCESS));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("ZZZZZZZ", "onPause");
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
     }
 }

@@ -2,6 +2,7 @@ package com.example.bipain.boe_restaurantapp.services;
 
 import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.LoginUserParam;
+import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -27,4 +28,7 @@ public interface Services {
     @FormUrlEncoded
     Call<User> getUserProfile(@Field("username") String username, @Path("id") String id);
 
+    @POST("notifications/register_reg_token")
+    @FormUrlEncoded
+    Call<NotificationResponse> registerRegToken(@Field("reg_token") String regToken);
 }
