@@ -13,6 +13,7 @@
     <permission
         android:name="com.example.bipain.boe_restaurantapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -70,6 +71,8 @@
         <activity
             android:name=".activities.WaiterActivity"
             android:screenOrientation="landscape"/>
+        <activity android:name=".activities.ObserActivity">
+        </activity>
     </application>
 
 </manifest>

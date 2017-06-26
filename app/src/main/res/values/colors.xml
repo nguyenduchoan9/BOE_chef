@@ -24,4 +24,5 @@
     <color name="holoOrangeLight">@android:color/holo_orange_light</color>
     <color name="holoRedLight">@android:color/holo_red_light</color>
     <color name="colorChef">#D32F2F</color>
+    <color name="colorWarning">#FFFF00</color>
 </resources>

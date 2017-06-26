@@ -41,9 +41,13 @@ public class Constant {
     public final static String KEY_DISH_DETAIL = "KEY_DISH_DETAIL";
     public final static String KEY_ID_CATEGORY = "KEY_ID_CATEGORY";
 
-    public final static String KEY_TOTAL_PAYMENT= "KEY_TOTAL_PAYMENT";
+    public final static String KEY_TOTAL_PAYMENT = "KEY_TOTAL_PAYMENT";
     public final static String KEY_ORDER_NAME = "KEY_ORDER_NAME";
     public final static String KEY_ORDER_ITEM_TOTAL = "KEY_ORDER_ITEM_TOTAL";
     public final static String KEY_ORDER_ADAPTER = "KEY_ORDER_ADAPTER";
 
+    public final static int IN_TIME = 0;
+    public final static int OVER_TIME = -1;
+
+    public final static String LOG_TAG = "WTF";
 }

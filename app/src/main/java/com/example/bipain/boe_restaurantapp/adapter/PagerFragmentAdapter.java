@@ -13,13 +13,13 @@ import java.util.ArrayList;
  */
 
 public class PagerFragmentAdapter extends FragmentPagerAdapter {
-    String[] title = {"order", "menu", "dish"};
+    String[] title = {"menu", "order", "dish"};
 
     public PagerFragmentAdapter(FragmentManager fm) {
         super(fm);
         fragments = new ArrayList<>();
-        fragments.add(new OrderFragment());
         fragments.add(new MenuFragment());
+        fragments.add(new OrderFragment());
         fragments.add(new DishFragment());
     }
 

@@ -19,4 +19,9 @@ public class DishNotification {
     public String getDishName() {
         return dishName;
     }
+
+    public DishNotification(int dishId, String dishName) {
+        this.dishId = dishId;
+        this.dishName = dishName;
+    }
 }

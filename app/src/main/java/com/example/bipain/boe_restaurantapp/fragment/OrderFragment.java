@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.example.bipain.boe_restaurantapp.adapter.OrderAdapter;
 import com.example.bipain.boe_restaurantapp.adapter.OrderDetailAdapter;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.Constant;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -200,5 +202,27 @@ public class OrderFragment extends Fragment {
 
     public Services getServices() {
         return ((TabManagerActivity) getActivity()).getServices();
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Constant.LOG_TAG, "Order-onstart");
+        setPos();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Constant.LOG_TAG, "Order-onResume");
+    }
+
+    private void setPos(){
+        ((TabManagerActivity)getActivity()).setFragmentPos(1);
+    }
+
+    public void onKeySearchChange(String term){
+
     }
 }

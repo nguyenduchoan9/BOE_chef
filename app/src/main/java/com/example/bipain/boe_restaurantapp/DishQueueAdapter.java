@@ -6,27 +6,33 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by BiPain on 6/9/2017.
  */
 
-public class DishQueueAdapter extends BaseAdapter {
+public class DishQueueAdapter extends BaseAdapter implements Filterable {
     private Activity activity;
     private ArrayList<DishInOrder> data;
+    private ArrayList<DishInOrder> originalData;
     private static LayoutInflater layoutInflater = null;
 
     public DishQueueAdapter(Activity activity, ArrayList<DishInOrder> data) {
         this.activity = activity;
         this.data = data;
+        originalData = data;
         layoutInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     public void setData(ArrayList<DishInOrder> data) {
         this.data = data;
+        originalData = data;
     }
 
     @Override
@@ -97,4 +103,41 @@ public class DishQueueAdapter extends BaseAdapter {
         this.listener = listener;
     }
 
+    private DishFilterable filter;
+
+    @Override
+    public Filter getFilter() {
+        if (null == filter) {
+            filter = new DishFilterable();
+        }
+        return filter;
+    }
+
+    private class DishFilterable extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence term) {
+            FilterResults filterResults = new FilterResults();
+            if (null == term || term.length() == 0) {
+                filterResults.values = originalData;
+                filterResults.count = originalData.size();
+            } else {
+                List<DishInOrder> filterDish = new ArrayList<>();
+                for (DishInOrder dish : originalData) {
+                    if (dish.getDish().getName().contains(term)) {
+                        filterDish.add(dish);
+                    }
+                    filterResults.values = filterDish;
+                    filterResults.count = filterDish.size();
+                }
+            }
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            data = (ArrayList<DishInOrder>) results.values;
+            notifyDataSetChanged();
+        }
+    }
 }

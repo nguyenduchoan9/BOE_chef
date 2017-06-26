@@ -6,11 +6,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import com.example.bipain.boe_restaurantapp.Category;
 import com.example.bipain.boe_restaurantapp.DishInOrder;
 import com.example.bipain.boe_restaurantapp.DishInQueue;
@@ -52,6 +56,7 @@ public class TabManagerActivity extends AppCompatActivity {
     private ArrayList<Category> categories = new ArrayList<>();
     private ArrayList<Dish> dishes = new ArrayList<>();
     private Gson gson = new Gson();
+    private int fragmentPos;
     PagerFragmentAdapter adapter;
 
     @Override
@@ -94,14 +99,13 @@ public class TabManagerActivity extends AppCompatActivity {
 
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         adapter = new PagerFragmentAdapter(getSupportFragmentManager());
-//        adapter.getItem(2).onCreate(null);
-//        adapter.getItem(0).onCreate(null);
-//        adapter.getItem(1).onCreate(null);
         viewPager.setAdapter(adapter);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-
+        tabLayout.getTabAt(1).select();
+        fragmentPos = 1;
+//        viewPager.getH
         setOrders();
         setQueueDish();
         setCategories();
@@ -313,8 +317,10 @@ public class TabManagerActivity extends AppCompatActivity {
                 } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_CHEF_ORDER)) {
                     String body = intent.getStringExtra("body");
                     QueueOrder order = gson.fromJson(body, QueueOrder.class);
+                    order.setNumberDish(order.getOrderDetail().size());
+                    order.setTotal(getTotal(order.getOrderDetail()));
                     if (null != adapter) {
-                        OrderFragment fragment = (OrderFragment) adapter.getItem(0);
+                        OrderFragment fragment = (OrderFragment) adapter.getItem(1);
                         fragment.addOrder(order);
                     }
                 } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_CHEF_DISH)) {
@@ -348,6 +354,14 @@ public class TabManagerActivity extends AppCompatActivity {
                 new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_ORDER));
     }
 
+    public int getTotal(ArrayList<DishInOrder> dishInOrders) {
+        int total = 0;
+        for (DishInOrder dish : dishInOrders) {
+            total += dish.getQuantity();
+        }
+        return total;
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -357,5 +371,42 @@ public class TabManagerActivity extends AppCompatActivity {
 
     public Services getServices() {
         return services;
+    }
+
+    public void setFragmentPos(int pos) {
+        fragmentPos = pos;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_search, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        setUpSearchView(menuItem);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private SearchView mSearchView;
+
+    private void setUpSearchView(MenuItem menuItem) {
+        mSearchView = (SearchView) menuItem.getActionView();
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mSearchView.clearFocus();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (1 == fragmentPos) {
+                    OrderFragment f = (OrderFragment) adapter.getItem(fragmentPos);
+                    f.onKeySearchChange(newText);
+                } else if (2 == fragmentPos) {
+                    DishFragment f = (DishFragment) adapter.getItem(fragmentPos);
+                    f.onKeySearchChange(newText);
+                }
+                return true;
+            }
+        });
     }
 }

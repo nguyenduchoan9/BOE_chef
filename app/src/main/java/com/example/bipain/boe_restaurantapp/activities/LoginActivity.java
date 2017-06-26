@@ -59,6 +59,11 @@ public class LoginActivity extends AppCompatActivity {
 
 //                startActivity(WaiterActivity.newInstance(LoginActivity.this));
             });
+
+            Button btn = (Button) findViewById(R.id.btnth);
+            btn.setOnClickListener(v -> {
+                startActivity(new Intent(LoginActivity.this, ObserActivity.class));
+            });
         }
     }
 

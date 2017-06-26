@@ -4,9 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +18,7 @@ import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.adapter.DishServeAdatper;
 import com.example.bipain.boe_restaurantapp.gcm.GCMIntentService;
 import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
-import com.example.bipain.boe_restaurantapp.model.User;
+import com.example.bipain.boe_restaurantapp.model.DishNotification;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
@@ -25,22 +27,27 @@ import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.subjects.PublishSubject;
 
 public class WaiterActivity extends AppCompatActivity {
     private BroadcastReceiver mBroadcastReceiver;
     private final static String GCM_TOKEN = "GCM_TOKEN";
-
+    private SchedulerThread myScheduler;
     private PreferencesManager preferencesManager;
     private EndpointManager endpointManager;
     private Retrofit apiService;
     private Services services;
     private Gson gson;
+    private Handler myHandler;
 
     @BindView(R.id.tvTotal)
     TextView tvTotal;
@@ -60,9 +67,29 @@ public class WaiterActivity extends AppCompatActivity {
         services = apiService.create(Services.class);
         gson = new Gson();
 
+        myHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                WaiterNotification i = (WaiterNotification) msg.obj;
+                mAdapter.notifyLongTime(i);
+                setTotal();
+                Log.d(LOG_TAG, i.getDish().getDishName()
+                        + "-"
+                        + String.valueOf(i.getDish().getDishId()));
+            }
+        };
+        myScheduler = new SchedulerThread();
+        myScheduler.setMyHandler(myHandler);
+
         setBroadcastReceiver();
 
         setUpRecyclerView();
+
+        scheduler = PublishSubject.create();
+        scheduler
+                .observeOn(AndroidSchedulers.mainThread())
+                .takeUntil(endPoint)
+                .subscribe(id -> ToastUtils.toastShortMassage(WaiterActivity.this, "dmmmmmm"));
     }
 
     private void setUpRecyclerView() {
@@ -113,8 +140,7 @@ public class WaiterActivity extends AppCompatActivity {
                 } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_WAITER)) {
                     String message = intent.getStringExtra("body");
                     WaiterNotification notification = gson.fromJson(message, WaiterNotification.class);
-                    mAdapter.addData(notification);
-                    setTotal();
+                    addDataHandlerAndAdapter(notification);
                 } else {
                     ToastUtils.toastShortMassage(getApplicationContext(), "Nothing");
                 }
@@ -123,17 +149,6 @@ public class WaiterActivity extends AppCompatActivity {
 
         Intent intent = new Intent(getApplicationContext(), GCMRegistrationIntentService.class);
         startService(intent);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_SUCCESS));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(GCMIntentService.MESSAGE_TO_WAITER));
     }
 
     @Override
@@ -150,6 +165,59 @@ public class WaiterActivity extends AppCompatActivity {
     }
 
     private void setTotal() {
-        tvTotal.setText("Tong so: " + String.valueOf(mAdapter.getItemCount()));
+        tvTotal.setText("Tổng số: " + String.valueOf(mAdapter.getItemCount()) + " dĩa");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_SUCCESS));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMIntentService.MESSAGE_TO_WAITER));
+        Thread t = new Thread(myScheduler);
+        t.start();
+
+    }
+
+    private String LOG_TAG = "XXXSCHEDULER";
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setTotal();
+        for(WaiterNotification n : fakeData()){
+            addDataHandlerAndAdapter(n);
+        }
+    }
+
+    private void addDataHandlerAndAdapter(WaiterNotification notification) {
+        notification.initCountTime();
+        mAdapter.addData(notification);
+        myScheduler.addItem(notification);
+        setTotal();
+    }
+
+    private PublishSubject<Integer> scheduler;
+
+    private PublishSubject<WaiterActivity> endPoint = PublishSubject.create();
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        endPoint.onNext(this);
+        myScheduler.stopThread();
+    }
+
+    private List<WaiterNotification> fakeData() {
+        List<WaiterNotification> notifications = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            DishNotification dishNotification = new DishNotification(i, "acp colum");
+            WaiterNotification waiterNotification = new WaiterNotification(4, dishNotification);
+            notifications.add(waiterNotification);
+        }
+        return notifications;
     }
 }

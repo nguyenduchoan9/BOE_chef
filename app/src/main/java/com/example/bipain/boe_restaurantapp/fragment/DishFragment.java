@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.TabManagerActivity;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 
 import android.widget.AdapterView;
@@ -82,7 +84,7 @@ public class DishFragment extends Fragment {
     }
 
     public void setDishInOrders() {
-        if(null != queueDish && queueDish.size() >0){
+        if (null != queueDish && queueDish.size() > 0) {
             for (DishInQueue dishInQueue : queueDish) {
                 int quantity = 0;
                 DishInOrder dishInOrder = new DishInOrder();
@@ -142,5 +144,28 @@ public class DishFragment extends Fragment {
 
     public Services getService() {
         return ((TabManagerActivity) getActivity()).getServices();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Constant.LOG_TAG, "Dish-onstart");
+        setPos();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Constant.LOG_TAG, "Dish-onResume");
+    }
+
+    private void setPos() {
+        ((TabManagerActivity) getActivity()).setFragmentPos(2);
+    }
+
+    public void onKeySearchChange(String term) {
+        if (null != dishQueueAdapter) {
+            dishQueueAdapter.getFilter().filter(term);
+        }
     }
 }

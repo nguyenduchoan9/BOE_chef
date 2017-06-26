@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import com.example.bipain.boe_restaurantapp.DishAdapter;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.TabManagerActivity;
 import com.example.bipain.boe_restaurantapp.model.Dish;
+import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 
 import java.util.ArrayList;
@@ -58,26 +60,23 @@ public class MenuFragment extends Fragment {
         lvCategory.setAdapter(categoryAdapter);
         lvDishInMenu.setAdapter(dishAdapter);
 
-        lvCategory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TextView txtCategoryId = (TextView) view.findViewById(R.id.txtCategoryId);
-                int categoryId = Integer.parseInt(txtCategoryId.getText().toString());
+        lvCategory.setOnItemClickListener((parent, view1, position, id) -> {
+            TextView txtCategoryId = (TextView) view1.findViewById(R.id.txtCategoryId);
+            int categoryId = Integer.parseInt(txtCategoryId.getText().toString());
 
-                if (preView != null) {
-                    TextView txtCategoryName = (TextView) preView.findViewById(R.id.txtCategoryName);
-                    txtCategoryName.setTextColor(Color.BLACK);
-                    preView.setBackgroundColor(Color.WHITE);
-                }
-                preView = view;
-                setDishAdapter(categoryId);
-                dishAdapter.setData(selectedDishes);
-                dishAdapter.notifyDataSetChanged();
-
-                TextView txtCategoryName = (TextView) view.findViewById(R.id.txtCategoryName);
+            if (preView != null) {
+                TextView txtCategoryName = (TextView) preView.findViewById(R.id.txtCategoryName);
                 txtCategoryName.setTextColor(Color.BLACK);
-                view.setBackgroundColor(Color.WHITE);
+                preView.setBackgroundColor(Color.WHITE);
             }
+            preView = view1;
+            setDishAdapter(categoryId);
+            dishAdapter.setData(selectedDishes);
+            dishAdapter.notifyDataSetChanged();
+
+            TextView txtCategoryName = (TextView) view1.findViewById(R.id.txtCategoryName);
+            txtCategoryName.setTextColor(Color.BLACK);
+            view1.setBackgroundColor(Color.WHITE);
         });
 
         return view;
@@ -85,12 +84,7 @@ public class MenuFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        dishAdapter.setListener(new DishAdapter.DishAdaprerListener() {
-            @Override
-            public void onCheckBoxListener(int dishId) {
-                ToastUtils.toastShortMassage(getContext(), "DishID: " + dishId);
-            }
-        });
+        dishAdapter.setListener(dishId -> ToastUtils.toastShortMassage(getContext(), "DishID: " + dishId));
     }
 
     public void setDishAdapter(int categoryId) {
@@ -100,5 +94,22 @@ public class MenuFragment extends Fragment {
                 selectedDishes.add(dish);
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Constant.LOG_TAG, "Menu-onstart");
+        setPos();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Constant.LOG_TAG, "Menu-onResume");
+    }
+
+    private void setPos() {
+        ((TabManagerActivity) getActivity()).setFragmentPos(0);
     }
 }

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp"
     tools:context="com.example.bipain.boe_restaurantapp.activities.WaiterActivity">
 
     <TextView
@@ -12,7 +11,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
-        android:text="Total: 10"
+        android:text="Total: 0"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
         android:textColor="@color/colorTextNavigation"
         android:textSize="@dimen/size_medium_text"/>
 
