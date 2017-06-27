@@ -126,8 +126,9 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             } else {
                 List<DishInOrder> filterDish = new ArrayList<>();
                 for (DishInOrder dish : originalData) {
-                    String lowerName = Normalizer.normalize(dish.getDish().getName(), Normalizer.Form.NFC).toLowerCase();
-                    String lowerTerm = Normalizer.normalize(term, Normalizer.Form.NFC).toLowerCase();
+                    String lowerTerm = Normalizer.normalize(term.toString().toLowerCase(), Normalizer.Form.NFD);
+                    String lowerName = Normalizer.normalize(dish.getDish().getName().toLowerCase(), Normalizer.Form.NFD);
+
                     if (lowerName.contains(lowerTerm)) {
                         filterDish.add(dish);
                     }
