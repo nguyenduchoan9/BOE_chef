@@ -44,4 +44,8 @@ public interface Services {
     @POST("orders/dish_done")
     @FormUrlEncoded
     Call<StatusResponse> markDishDone(@Field("order_id") int oderId, @Field("dish_id") int dishId);
+
+    @POST("orders/list_dish_done")
+    @FormUrlEncoded
+    Call<StatusResponse> markListDishDone(@Field("list_done") String oderId);
 }

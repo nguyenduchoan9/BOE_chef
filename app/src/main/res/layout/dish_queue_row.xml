@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="32dp"
         android:layout_toLeftOf="@+id/txtQuantity"
-        android:text="Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll Spring Roll Spring RollSpring RollSpring RollSpring RollSpring RollSpring Roll"
+        android:text="Roll"
         android:textSize="20dp"
         android:textStyle="bold" />
 
@@ -28,23 +28,19 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/txtDishName"
         android:layout_alignTop="@+id/txtDishName"
-        android:layout_marginRight="40dp"
-        android:layout_toLeftOf="@+id/btCookedDish"
+        android:layout_marginRight="80dp"
+        android:layout_toLeftOf="@+id/chkCookedDish"
         android:gravity="center"
         android:text="x 4"
         android:textSize="20dp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/btCookedDish"
+    <CheckBox
+        android:id="@+id/chkCookedDish"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/txtDishName"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/txtDishName"
-        android:gravity="center"
-        android:text="Done"
-        android:textColor="@android:color/holo_red_light"
-        android:textSize="20dp"
-        android:textStyle="bold" />
+        android:gravity="center" />
 </RelativeLayout>

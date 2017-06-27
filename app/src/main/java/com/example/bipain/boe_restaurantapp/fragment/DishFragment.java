@@ -21,11 +21,14 @@ import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,6 +39,9 @@ public class DishFragment extends Fragment {
     private DishQueueAdapter dishQueueAdapter;
     private LinkedList<DishInQueue> queueDish;
     private ArrayList<DishInOrder> dishInOrders;
+    private Button btDone;
+
+    String listCompletedDish = "";
 
     View view;
 
@@ -46,14 +52,63 @@ public class DishFragment extends Fragment {
         dishInOrders = new ArrayList<>();
         setDishInOrders();
         dishQueueAdapter = new DishQueueAdapter(getActivity(), dishInOrders);
+
+        lvDishInQueue = (ListView) view.findViewById(R.id.lvQueueDish);
+        lvDishInQueue.setAdapter(dishQueueAdapter);
+
+        lvDishInQueue.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                DishInOrder dish = (DishInOrder) lvDishInQueue.getItemAtPosition(position);
+                CheckBox chkCheck = (CheckBox) view.findViewById(R.id.chkCookedDish);
+                boolean ischecked = chkCheck.isChecked();
+                if (!ischecked) {
+                    chkCheck.setChecked(true);
+                    listCompletedDish += dish.getDish().getDishId() + "-" + getOrderIdByDish(dish.getDish().getDishId()) + ";";
+                } else {
+                    chkCheck.setChecked(false);
+                    String[] listDish = listCompletedDish.split(";");
+                    listCompletedDish = "";
+                    for (String cookedDish : listDish) {
+                        if (!cookedDish.contains(dish.getDish().getDishId() + "-")) {
+                            listCompletedDish += cookedDish + ";";
+                        }
+                    }
+                }
+            }
+        });
+        btDone = (Button) view.findViewById(R.id.btDone);
+
+        btDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Services services = getService();
+                services.markListDishDone(listCompletedDish).enqueue(new Callback<StatusResponse>() {
+                    @Override
+                    public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                        String[] listDish = listCompletedDish.split(";");
+                        for (String cookedDish : listDish) {
+                            String[] id = cookedDish.split("-");
+                            int dishId = Integer.parseInt(id[0]);
+                            removeDishIsCooked(dishId);
+                        }
+                        listCompletedDish = "";
+                        refreshListViewDish();
+                    }
+
+                    @Override
+                    public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+                    }
+                });
+
+            }
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_dish_fragment, container, false);
-
-        lvDishInQueue = (ListView) view.findViewById(R.id.lvQueueDish);
-        lvDishInQueue.setAdapter(dishQueueAdapter);
 
         return view;
     }
@@ -134,7 +189,7 @@ public class DishFragment extends Fragment {
                 break;
             }
         }
-        refreshListViewDish();
+        //refreshListViewDish();
     }
 
     public void addNewQueue(DishInQueue queue) {

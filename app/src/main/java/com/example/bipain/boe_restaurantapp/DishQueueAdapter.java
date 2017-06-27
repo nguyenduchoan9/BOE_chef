@@ -6,10 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,9 +69,10 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         viewlHolder.txtDishName.setText(dish.getDish().getName());
         viewlHolder.txtQuantity.setText(String.valueOf(dish.getQuantity()));
         viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
+        viewlHolder.chkDone.setChecked(false);
         DishInOrder finalDish = dish;
-        viewlHolder.btDone.setOnClickListener(v ->
-                listener.onDoneClick(finalDish.getDish().getDishId()));
+       // viewlHolder.chkDone.setOnClickListener(v ->
+       //         listener.onDoneClick(finalDish.getDish().getDishId()));
 
         return convertView;
     }
@@ -78,7 +81,7 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         public TextView txtDishName;
         public TextView txtQuantity;
         public TextView txtDishId;
-        public TextView btDone;
+        public CheckBox chkDone;
 
         public ViewHolder(View v) {
             initView(v);
@@ -88,8 +91,7 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             txtDishName = (TextView) view.findViewById(R.id.txtDishName);
             txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
             txtDishId = (TextView) view.findViewById(R.id.txtDishId);
-            btDone = (TextView) view.findViewById(R.id.btCookedDish);
-//            v
+            chkDone = (CheckBox) view.findViewById(R.id.chkCookedDish);
         }
     }
 
@@ -124,7 +126,9 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             } else {
                 List<DishInOrder> filterDish = new ArrayList<>();
                 for (DishInOrder dish : originalData) {
-                    if (dish.getDish().getName().contains(term)) {
+                    String lowerName = Normalizer.normalize(dish.getDish().getName(), Normalizer.Form.NFC).toLowerCase();
+                    String lowerTerm = Normalizer.normalize(term, Normalizer.Form.NFC).toLowerCase();
+                    if (lowerName.contains(lowerTerm)) {
                         filterDish.add(dish);
                     }
                     filterResults.values = filterDish;
