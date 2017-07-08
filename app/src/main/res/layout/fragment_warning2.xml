@@ -1,0 +1,26 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="com.example.bipain.boe_restaurantapp.fragment.ServingFragment">
+
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif"
+        android:text="Total: 0"
+        android:textColor="@color/colorTextNavigation"
+        android:textSize="@dimen/size_medium_text"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvDish"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tvTotal"
+        android:layout_marginTop="4dp"/>
+
+</RelativeLayout>

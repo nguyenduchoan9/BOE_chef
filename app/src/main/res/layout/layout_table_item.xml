@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="8dp">
+
+    <TextView
+        android:id="@+id/tvTableNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="talbe 1"
+        android:textColor="@color/colorTextNavigation"
+        android:textSize="@dimen/size_large_text"/>
+
+    <TextView
+        android:id="@+id/tvDish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ttom tom tomtmot"
+        android:textColor="@color/colorTextNavigation"
+        android:textSize="@dimen/size_medium_text"/>
+</LinearLayout>

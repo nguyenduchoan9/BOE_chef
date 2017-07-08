@@ -1,5 +1,9 @@
 package com.example.bipain.boe_restaurantapp.utils;
 
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
+
 /**
  * Created by hoang on 24/06/2017.
  */
@@ -23,5 +27,11 @@ public class Util {
             lock[0] = true;
             object.notify();
         }
+    }
+
+    public static Drawable changeDrawableColor(Drawable drawable, int newColor) {
+//        Drawable mDrawable = ContextCompat.getDrawable(context, icon).mutate();
+        drawable.setColorFilter(new PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_IN));
+        return drawable;
     }
 }

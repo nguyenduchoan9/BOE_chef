@@ -1,10 +1,13 @@
 package com.example.bipain.boe_restaurantapp.services;
 
+import com.example.bipain.boe_restaurantapp.model.Material;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
+import com.example.bipain.boe_restaurantapp.model.TableModel;
 import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.LoginUserParam;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
+import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -48,4 +51,18 @@ public interface Services {
     @POST("orders/list_dish_done")
     @FormUrlEncoded
     Call<StatusResponse> markListDishDone(@Field("list_done") String oderId);
+
+    @GET("materials")
+    Call<List<Material>> getMaterial();
+
+    @POST("materials/mark_not_available")
+    @FormUrlEncoded
+    Call<StatusResponse> markMaterialNotAvailable(@Field("ids") int ids);
+
+    @POST("materials/mark_available")
+    @FormUrlEncoded
+    Call<StatusResponse> markMaterialAvailable(@Field("ids") int ids);
+
+    @GET("orders/table_dish")
+    Call<List<TableModel>> getTable();
 }

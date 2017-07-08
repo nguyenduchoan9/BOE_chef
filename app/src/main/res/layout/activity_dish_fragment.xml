@@ -17,7 +17,7 @@
         <Button
             android:id="@+id/btDone"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Done"
             android:layout_alignParentRight="true"
             android:textStyle="bold"

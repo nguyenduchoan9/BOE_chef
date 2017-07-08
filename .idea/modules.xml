@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BOE_RestaurantApp.iml" filepath="$PROJECT_DIR$/BOE_RestaurantApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BOE_chef_old.iml" filepath="$PROJECT_DIR$/BOE_chef_old.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

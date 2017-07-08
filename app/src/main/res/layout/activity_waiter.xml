@@ -4,24 +4,107 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context="com.example.bipain.boe_restaurantapp.activities.WaiterActivity">
 
-    <TextView
-        android:id="@+id/tvTotal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:text="Total: 0"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp"
-        android:textColor="@color/colorTextNavigation"
-        android:textSize="@dimen/size_medium_text"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvDish"
+    <com.example.bipain.boe_restaurantapp.utils.CanvasLinearLayout
+        android:id="@+id/bottomNavi"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:weightSum="3">
+
+        <LinearLayout
+            android:id="@+id/containerServing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivServing"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_bell_covering_hot_dish"/>
+
+            <TextView
+                android:id="@+id/tvServing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif"
+                android:text="Serving"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerAttention"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivAttention"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_stop_watch"/>
+
+            <TextView
+                android:id="@+id/tvAttention"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif"
+                android:text="Attention"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerTable"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivTable"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_stop_watch"/>
+
+            <TextView
+                android:id="@+id/tvTable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:fontFamily="sans-serif"
+                android:text="Attention"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:visibility="gone"
+                />
+        </LinearLayout>
+
+    </com.example.bipain.boe_restaurantapp.utils.CanvasLinearLayout>
+
+    <FrameLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tvTotal"
-        android:layout_marginTop="4dp"/>
+        android:layout_above="@id/bottomNavi"/>
 </RelativeLayout>

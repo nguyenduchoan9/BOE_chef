@@ -41,7 +41,7 @@ public class DishFragment extends Fragment {
     private ArrayList<DishInOrder> dishInOrders;
     private Button btDone;
 
-    String listCompletedDish = "";
+    StringBuilder listCompletedDish = new StringBuilder("");
 
     View view;
 
@@ -53,63 +53,70 @@ public class DishFragment extends Fragment {
         setDishInOrders();
         dishQueueAdapter = new DishQueueAdapter(getActivity(), dishInOrders);
 
-        lvDishInQueue = (ListView) view.findViewById(R.id.lvQueueDish);
-        lvDishInQueue.setAdapter(dishQueueAdapter);
-
-        lvDishInQueue.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DishInOrder dish = (DishInOrder) lvDishInQueue.getItemAtPosition(position);
-                CheckBox chkCheck = (CheckBox) view.findViewById(R.id.chkCookedDish);
-                boolean ischecked = chkCheck.isChecked();
-                if (!ischecked) {
-                    chkCheck.setChecked(true);
-                    listCompletedDish += dish.getDish().getDishId() + "-" + getOrderIdByDish(dish.getDish().getDishId()) + ";";
-                } else {
-                    chkCheck.setChecked(false);
-                    String[] listDish = listCompletedDish.split(";");
-                    listCompletedDish = "";
-                    for (String cookedDish : listDish) {
-                        if (!cookedDish.contains(dish.getDish().getDishId() + "-")) {
-                            listCompletedDish += cookedDish + ";";
-                        }
-                    }
-                }
-            }
-        });
-        btDone = (Button) view.findViewById(R.id.btDone);
-
-        btDone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Services services = getService();
-                services.markListDishDone(listCompletedDish).enqueue(new Callback<StatusResponse>() {
-                    @Override
-                    public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                        String[] listDish = listCompletedDish.split(";");
-                        for (String cookedDish : listDish) {
-                            String[] id = cookedDish.split("-");
-                            int dishId = Integer.parseInt(id[0]);
-                            removeDishIsCooked(dishId);
-                        }
-                        listCompletedDish = "";
-                        refreshListViewDish();
-                    }
-
-                    @Override
-                    public void onFailure(Call<StatusResponse> call, Throwable t) {
-
-                    }
-                });
-
-            }
-        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_dish_fragment, container, false);
+        lvDishInQueue = (ListView) view.findViewById(R.id.lvQueueDish);
+        lvDishInQueue.setAdapter(dishQueueAdapter);
 
+//        lvDishInQueue.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view1, int position, long id) {
+//                DishInOrder dish = (DishInOrder) lvDishInQueue.getItemAtPosition(position);
+////            CheckBox chkCheck = (CheckBox) view1.findViewById(R.id.chkCookedDish);
+//                CheckBox chkCheck = null;
+//                boolean ischecked = chkCheck.isChecked();
+//                if (!ischecked) {
+//                    chkCheck.setChecked(true);
+//                    listCompletedDish += DishFragment.this.getOrderIdByDish(dish.getDish().getDishId()) + "-" + dish.getDish().getDishId() + ";";
+//                } else {
+//                    chkCheck.setChecked(false);
+//                    String[] listDish = listCompletedDish.split(";");
+//                    listCompletedDish = "";
+//                    for (String cookedDish : listDish) {
+//                        if (!cookedDish.contains("-" + dish.getDish().getDishId())) {
+//                            listCompletedDish += cookedDish + ";";
+//                        }
+//                    }
+//                }
+//            }
+//        });
+        btDone = (Button) view.findViewById(R.id.btDone);
+
+        btDone.setOnClickListener(v -> {
+            if (listCompletedDish.length() > 0) {
+                Services services = getService();
+                String listDishParam = listCompletedDish.deleteCharAt(listCompletedDish.length() - 1).toString();
+                listDishParam =  listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
+                listCompletedDish = new StringBuilder(listDishParam);
+                services.markListDishDone(listDishParam)
+                        .enqueue(new Callback<StatusResponse>() {
+                            @Override
+                            public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                                if (response.isSuccessful()) {
+                                    if (null != response.body()) {
+                                        String[] listDish = listCompletedDish.toString().split(";");
+                                        for (String cookedDish : listDish) {
+                                            String[] id = cookedDish.split("_");
+                                            int dishId = Integer.parseInt(id[1]);
+                                            removeDishIsCooked(dishId);
+                                        }
+                                        refreshListViewDish();
+                                        listCompletedDish = new StringBuilder("");
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+                            }
+                        });
+            }
+
+        });
         return view;
     }
 
@@ -117,25 +124,46 @@ public class DishFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        dishQueueAdapter.setListener(dishId -> {
-            Services services = getService();
-            int orderId = getOrderIdByDish(dishId);
-            services.markDishDone(orderId, dishId).enqueue(new Callback<StatusResponse>() {
-                @Override
-                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                    if (response.isSuccessful()) {
-                        if (null != response.body()) {
-                            removeDishIsCooked(dishId);
-                        }
+        dishQueueAdapter.setListener(new DishQueueAdapter.DishQueueAdapterListener() {
+            @Override
+            public void onDoneClick(int dishId) {
+                listCompletedDish.append(String.valueOf(DishFragment.this.getOrderIdByDish(dishId)))
+                        .append("_")
+                        .append(String.valueOf(dishId))
+                        .append(";");
+            }
+
+            @Override
+            public void onNotDoneClick(int dishId) {
+                String[] listDish = listCompletedDish.toString().split(";");
+                listCompletedDish = new StringBuilder("");
+                for (String cookedDish : listDish) {
+                    if (!cookedDish.contains("_" + dishId)) {
+                        listCompletedDish.append(cookedDish)
+                                .append(";");
                     }
                 }
-
-                @Override
-                public void onFailure(Call<StatusResponse> call, Throwable t) {
-
-                }
-            });
+            }
         });
+//        dishQueueAdapter.setListener(dishId -> {
+//            Services services = getService();
+//            int orderId = getOrderIdByDish(dishId);
+//            services.markDishDone(orderId, dishId).enqueue(new Callback<StatusResponse>() {
+//                @Override
+//                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+//                    if (response.isSuccessful()) {
+//                        if (null != response.body()) {
+//                            removeDishIsCooked(dishId);
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<StatusResponse> call, Throwable t) {
+//
+//                }
+//            });
+//        });
     }
 
     public void setDishInOrders() {
@@ -215,7 +243,7 @@ public class DishFragment extends Fragment {
     }
 
     private void setPos() {
-        ((TabManagerActivity) getActivity()).setFragmentPos(2);
+        ((TabManagerActivity) getActivity()).setFragmentPos(0);
     }
 
     public void onKeySearchChange(String term) {

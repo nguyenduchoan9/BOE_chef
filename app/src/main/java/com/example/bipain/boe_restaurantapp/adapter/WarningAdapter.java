@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
-import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
 import java.util.ArrayList;
@@ -18,14 +17,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by hoang on 10/06/2017.
+ * Created by hoang on 29/06/2017.
  */
 
-public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.ViewHolder> {
+public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHolder> {
     List<WaiterNotification> waiterNotifications;
     private Context mContext;
 
-    public DishServeAdatper() {
+    public WarningAdapter() {
         waiterNotifications = new ArrayList<>();
     }
 
@@ -35,57 +34,25 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
     }
 
     public void addData(WaiterNotification activity) {
+//        int pos = waiterNotifications.size();
         waiterNotifications.add(activity);
         notifyItemInserted(waiterNotifications.size());
-    }
-
-    public void removeData(WaiterNotification item) {
-        int pos = findPos(item);
-        if (-1 != pos) {
-            waiterNotifications.remove(pos);
-            notifyItemRemoved(pos);
-        }
-
-    }
-
-    private int findPos(WaiterNotification item) {
-        for (int i = 0; i < waiterNotifications.size(); i++) {
-            WaiterNotification needItem = waiterNotifications.get(i);
-            if (item.getDish().getDishId() == needItem.getDish().getDishId()
-                    && (item.getTiming().getTime() - needItem.getTiming().getTime()) == 0) {
-                return i;
-            }
-        }
-        return -1;
+//        notifyItemRangeChanged(pos, waiterNotifications.size());
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public WarningAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.layout_dish_item, parent, false);
-        return new ViewHolder(v);
+        return new WarningAdapter.ViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(WarningAdapter.ViewHolder holder, int position) {
         WaiterNotification item = waiterNotifications.get(position);
         holder.tvDishNam.setText(item.getDish().getDishName());
         holder.tvTableNumber.setText("Table No." + String.valueOf(item.getTableNumber()));
         if (Constant.OVER_TIME == item.getType() && !item.isNotify()) {
-//            for (int i = 0; i < 4; i++) {
-//                holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWarning));
-//                try {
-//                    Thread.sleep(400);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                holder.container.setBackgroundColor(ContextCompat.getColor(mContext, android.R.color.white));
-//                try {
-//                    Thread.sleep(400);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
             holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWarning));
             item.setNotified();
         } else if (item.isNotify()) {
@@ -133,11 +100,12 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
 
     public interface WaiterListner {
         void onServeClick();
+
     }
 
-    private WaiterListner listner;
+    private WarningAdapter.WaiterListner listner;
 
-    public void setListner(WaiterListner listner) {
+    public void setListner(WarningAdapter.WaiterListner listner) {
         this.listner = listner;
     }
 

@@ -15,6 +15,11 @@ public class SchedulerThread implements Runnable {
     private List<WaiterNotification> itemTiming = new ArrayList<>();
     private List<WaiterNotification> itemTimingMore = new ArrayList<>();
     private Handler myHandler;
+    private Handler handleLongTime;
+
+    public void setHandleLongTime(Handler handleLongTime) {
+        this.handleLongTime = handleLongTime;
+    }
 
     public void setMyHandler(Handler myHandler) {
         this.myHandler = myHandler;
@@ -37,28 +42,40 @@ public class SchedulerThread implements Runnable {
     @Override
     public void run() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-        while (flagStop) {
-            if (null != itemTiming) {
-                if (itemTiming.size() > 0) {
-                    List<WaiterNotification> newList = new ArrayList<>();
-                    for (WaiterNotification timing : itemTiming) {
-                        newList.add(timing);
-                        if (timing.isWaitLong()) {
-                            if (null != myHandler) {
-                                Message msg = new Message();
-                                msg.obj = timing;
-                                myHandler.sendMessage(msg);
-                            }
-                            newList.remove(newList.size() - 1);
+//        while (flagStop) {
+        if (null != itemTiming) {
+            if (itemTiming.size() > 0) {
+                List<WaiterNotification> newList = new ArrayList<>();
+                for (WaiterNotification timing : itemTiming) {
+                    newList.add(timing);
+                    if (timing.isTooLong()) {
+                        if (null != handleLongTime) {
+                            Message msg = new Message();
+                            Message msg2 = new Message();
+                            timing.setNotifyToWarning();
+                            msg.obj = timing;
+                            msg2.obj = timing;
+                            handleLongTime.sendMessage(msg2);
+                            myHandler.sendMessage(msg);
+                        }
+                        newList.remove(newList.size() - 1);
+                    } else if (timing.isWaitShort() && !timing.isNotifyToShort()) {
+                        if (null != myHandler) {
+                            Message msg = new Message();
+                            timing.setNotifiedShort();
+                            msg.obj = timing;
+                            myHandler.sendMessage(msg);
                         }
                     }
-                    itemTiming = newList;
                 }
-                if (itemTimingMore.size() > 0) {
-                    itemTiming.addAll(itemTimingMore);
-                    itemTimingMore = new ArrayList<>();
-                }
+                itemTiming = newList;
+            }
+            if (itemTimingMore.size() > 0) {
+                itemTiming.addAll(itemTimingMore);
+                itemTimingMore = new ArrayList<>();
             }
         }
+        myHandler.postDelayed(this, 500);
+//        }
     }
 }

@@ -103,8 +103,23 @@ public class TabManagerActivity extends AppCompatActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.getTabAt(1).select();
-        fragmentPos = 1;
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                fragmentPos = tab.getPosition();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 //        viewPager.getH
         setOrders();
         setQueueDish();
@@ -319,18 +334,17 @@ public class TabManagerActivity extends AppCompatActivity {
                     QueueOrder order = gson.fromJson(body, QueueOrder.class);
                     order.setNumberDish(order.getOrderDetail().size());
                     order.setTotal(getTotal(order.getOrderDetail()));
-                    if (null != adapter) {
-                        OrderFragment fragment = (OrderFragment) adapter.getItem(1);
-                        fragment.addOrder(order);
-                    }
+//                    if (null != adapter) {
+//                        OrderFragment fragment = (OrderFragment) adapter.getItem(1);
+//                        fragment.addOrder(order);
+//                    }
                 } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_CHEF_DISH)) {
                     String body = intent.getStringExtra("body");
                     DishInQueue queue = gson.fromJson(body, DishInQueue.class);
                     if (null != adapter) {
-                        DishFragment fragment = (DishFragment) adapter.getItem(2);
+                        DishFragment fragment = (DishFragment) adapter.getItem(0);
                         fragment.addNewQueue(queue);
                     }
-
                 } else {
                     ToastUtils.toastShortMassage(getApplicationContext(), "Nothing");
                 }
@@ -352,6 +366,8 @@ public class TabManagerActivity extends AppCompatActivity {
                 new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_DISH));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_ORDER));
+        tabLayout.getTabAt(0).select();
+        fragmentPos = 0;
     }
 
     public int getTotal(ArrayList<DishInOrder> dishInOrders) {
@@ -398,10 +414,7 @@ public class TabManagerActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (1 == fragmentPos) {
-                    OrderFragment f = (OrderFragment) adapter.getItem(fragmentPos);
-                    f.onKeySearchChange(newText);
-                } else if (2 == fragmentPos) {
+                if (0 == fragmentPos) {
                     DishFragment f = (DishFragment) adapter.getItem(fragmentPos);
                     f.onKeySearchChange(newText);
                 }

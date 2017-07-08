@@ -13,6 +13,25 @@ public class WaiterNotification {
     private int tableNumber;
     @SerializedName("dish")
     private DishNotification dish;
+    private boolean isNotifyToShort = false;
+
+    public void setNotifiedShort(){
+        isNotifyToShort = true;
+    }
+
+    public boolean isNotifyToShort(){
+        return notify;
+    }
+
+    private boolean isNotifyToWarning = false;
+
+    public boolean isNotifyToWarning() {
+        return isNotifyToWarning;
+    }
+
+    public void setNotifyToWarning() {
+        isNotifyToWarning = true;
+    }
 
     public int getTableNumber() {
         return tableNumber;
@@ -29,14 +48,23 @@ public class WaiterNotification {
 
     private Date timing;
 
+    public Date getTiming(){
+        return timing;
+    }
+
     public void initCountTime() {
         timing = new Date();
         type = Constant.IN_TIME;
     }
 
-    public boolean isWaitLong() {
+    public boolean isWaitShort() {
         Date currentTime = new Date();
         return (currentTime.getTime() - timing.getTime()) > 20000;
+    }
+
+    public boolean isTooLong(){
+        Date currentTime = new Date();
+        return (currentTime.getTime() - timing.getTime()) > 40000;
     }
 
     private int type;

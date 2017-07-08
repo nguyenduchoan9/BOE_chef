@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
     public void setData(ArrayList<DishInOrder> data) {
         this.data = data;
         originalData = data;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -71,8 +73,22 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
         viewlHolder.chkDone.setChecked(false);
         DishInOrder finalDish = dish;
-       // viewlHolder.chkDone.setOnClickListener(v ->
-       //         listener.onDoneClick(finalDish.getDish().getDishId()));
+        viewlHolder.chkDone.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    listener.onDoneClick(finalDish.getDish().getDishId());
+                }else {
+                    listener.onNotDoneClick(finalDish.getDish().getDishId());
+                }
+            }
+        });
+//        viewlHolder.chkDone.setOnClickListener(v -> {
+//                    if (viewlHolder.chkDone.isChecked()) {
+//
+//                    }
+//                }
+//        );
 
         return convertView;
     }
@@ -97,6 +113,8 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
 
     public interface DishQueueAdapterListener {
         void onDoneClick(int dishId);
+
+        void onNotDoneClick(int dishId);
     }
 
     private DishQueueAdapterListener listener;
