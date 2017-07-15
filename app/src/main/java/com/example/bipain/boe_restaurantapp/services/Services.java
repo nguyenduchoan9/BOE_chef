@@ -57,7 +57,7 @@ public interface Services {
 
     @POST("materials/mark_not_available")
     @FormUrlEncoded
-    Call<StatusResponse> markMaterialNotAvailable(@Field("ids") int ids);
+    Call<List<Integer>> markMaterialNotAvailable(@Field("ids") int ids);
 
     @POST("materials/mark_available")
     @FormUrlEncoded
@@ -65,4 +65,16 @@ public interface Services {
 
     @GET("orders/table_dish")
     Call<List<TableModel>> getTable();
+
+    @POST("orders/notify_order_detail_not_available")
+    @FormUrlEncoded
+    Call<StatusResponse> postNotifyDishNotAvailable(@Field("list_order_detail_id") String ids);
+
+    @POST("orders/mark_order_detail_served")
+    @FormUrlEncoded
+    Call<StatusResponse> markOrderDetailServed(@Field("order_detail_id") int ids);
+
+    @POST("orders/mark_list_order_detail_served")
+    @FormUrlEncoded
+    Call<StatusResponse> markListOrderDetailServed(@Field("list_order_detail_id") String ids);
 }

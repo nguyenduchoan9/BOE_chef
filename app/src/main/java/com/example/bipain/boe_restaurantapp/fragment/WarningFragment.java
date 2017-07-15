@@ -11,16 +11,25 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
 import com.example.bipain.boe_restaurantapp.adapter.DishServeAdatper;
 import com.example.bipain.boe_restaurantapp.adapter.WarningAdapter;
+import com.example.bipain.boe_restaurantapp.model.StatusResponse;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
+import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
+import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subjects.PublishSubject;
 
@@ -36,8 +45,11 @@ public class WarningFragment extends Fragment {
     TextView tvTotal;
     @BindView(R.id.rvDish)
     RecyclerView rvDish;
+    @BindView(R.id.rlProcessing)
+    RelativeLayout rlProcessing;
 
     WarningAdapter mAdapter;
+    Services services;
 
     public WarningFragment() {
         // Required empty public constructor
@@ -46,13 +58,33 @@ public class WarningFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        services = getServices();
         mAdapter = new WarningAdapter();
-        mAdapter.setListner(() -> setTotal());
+        mAdapter.setListner((pos, notify) -> {
+            showProcessing();
+            services.markOrderDetailServed(notify.getOrderDetailId()).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            setTotal();
+                            mAdapter.removeData(notify);
+                        }
+                    }
+                    hideProcessing();
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    hideProcessing();
+                }
+            });
+        });
         myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 WaiterNotification i = (WaiterNotification) msg.obj;
-                if(i.isNotifyToWarning()){
+                if (i.isNotifyToWarning()) {
                     mAdapter.addData(i);
                 }
                 setTotal();
@@ -104,5 +136,22 @@ public class WarningFragment extends Fragment {
 
     public Handler getMyHandler() {
         return myHandler;
+    }
+
+    private void showProcessing() {
+        rlProcessing.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProcessing() {
+        rlProcessing.setVisibility(View.GONE);
+    }
+
+    private Services getServices() {
+        return ((WaiterActivity) getActivity()).getServices();
+    }
+
+    public void updateFromTable(List<TableGroupServe> listOD){
+        mAdapter.removeInDerictFromTable(listOD);
+        setTotal();
     }
 }

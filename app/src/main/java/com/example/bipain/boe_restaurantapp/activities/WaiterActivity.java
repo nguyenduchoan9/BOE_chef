@@ -23,6 +23,7 @@ import com.example.bipain.boe_restaurantapp.fragment.TableFragment;
 import com.example.bipain.boe_restaurantapp.fragment.WarningFragment;
 import com.example.bipain.boe_restaurantapp.gcm.GCMIntentService;
 import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
@@ -32,6 +33,7 @@ import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import com.example.bipain.boe_restaurantapp.utils.Util;
 import com.google.gson.Gson;
+import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
@@ -319,6 +321,16 @@ public class WaiterActivity extends AppCompatActivity {
 
     public Services getServices() {
         return services;
+    }
+
+    public SchedulerThread getMyScheduler() {
+        return myScheduler;
+    }
+
+    public void updateFromTable(List<TableGroupServe> listOD) {
+        myScheduler.setItemTableServed(listOD);
+        servingFragment.updateFromTable(listOD);
+        warningFragment.updateFromTable(listOD);
     }
 
 }

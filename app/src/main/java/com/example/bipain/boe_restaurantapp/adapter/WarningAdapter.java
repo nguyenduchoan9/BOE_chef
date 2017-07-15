@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
 import java.util.ArrayList;
@@ -38,6 +39,62 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
         waiterNotifications.add(activity);
         notifyItemInserted(waiterNotifications.size());
 //        notifyItemRangeChanged(pos, waiterNotifications.size());
+    }
+
+    public void removeData(WaiterNotification item) {
+        int pos = findPos(item);
+        if (-1 != pos) {
+            waiterNotifications.remove(pos);
+            notifyItemRemoved(pos);
+        }
+
+    }
+
+    private int findPos(WaiterNotification item) {
+        for (int i = 0; i < waiterNotifications.size(); i++) {
+            WaiterNotification needItem = waiterNotifications.get(i);
+            if (item.getTiming() == needItem.getTiming()
+                    && item.getOrderDetailId() == item.getOrderDetailId()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void removeInDerictFromTable(List<TableGroupServe> listOD) {
+        if (null != listOD) {
+            if (listOD.size() > 0) {
+                for (int i = 0; i < listOD.size(); i++) {
+                    int timeLoop = listOD.get(i).quantityCountInFragment;
+                    boolean flagContinue = true;
+                    while (false != flagContinue) {
+                        int od = listOD.get(i).orderDetailId;
+                        int postInAdapter = findPostByOrderDetailId(od);
+                        if (-1 != postInAdapter) {
+                            listOD.get(i).quantityCountInFragment -= 1;
+                            waiterNotifications.remove(postInAdapter);
+                            notifyItemRemoved(postInAdapter);
+                        } else {
+                            flagContinue = false;
+                            timeLoop -= 1;
+                            if (timeLoop == 0)
+                                flagContinue = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private int findPostByOrderDetailId(int orderDetailId) {
+        for (int i = 0; i < waiterNotifications.size(); i++) {
+            WaiterNotification needItem = waiterNotifications.get(i);
+            if (orderDetailId == needItem.getOrderDetailId()) {
+                return i;
+            }
+        }
+        return -1;
+
     }
 
     @Override
@@ -85,9 +142,7 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
         private void initView() {
             tvServe.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
-                waiterNotifications.remove(pos);
-                notifyItemRemoved(pos);
-                listner.onServeClick();
+                listner.onServeClick(pos, waiterNotifications.get(pos));
             });
         }
     }
@@ -99,7 +154,7 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
     }
 
     public interface WaiterListner {
-        void onServeClick();
+        void onServeClick(int id, WaiterNotification notification);
 
     }
 

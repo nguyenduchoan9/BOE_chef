@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:padding="8dp">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
 
     <TextView
         android:id="@+id/tvTableNumber"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/tvServe"
         android:text="talbe 1"
         android:textColor="@color/colorTextNavigation"
         android:textSize="@dimen/size_large_text"/>
 
     <TextView
         android:id="@+id/tvDish"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTableNumber"
+        android:layout_toLeftOf="@+id/tvServe"
         android:text="ttom tom tomtmot"
         android:textColor="@color/colorTextNavigation"
         android:textSize="@dimen/size_medium_text"/>
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/tvServe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvDish"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/tvTableNumber"
+        android:layout_marginLeft="24dp"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="Serve"
+        android:textColor="@color/order_green"
+        android:textSize="@dimen/size_x_large_text"/>
+</RelativeLayout>

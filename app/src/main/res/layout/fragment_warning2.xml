@@ -23,4 +23,6 @@
         android:layout_below="@+id/tvTotal"
         android:layout_marginTop="4dp"/>
 
+    <include layout="@layout/layout_processing"/>
+
 </RelativeLayout>

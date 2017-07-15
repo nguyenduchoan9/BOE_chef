@@ -24,10 +24,12 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,6 +42,7 @@ public class DishFragment extends Fragment {
     private LinkedList<DishInQueue> queueDish;
     private ArrayList<DishInOrder> dishInOrders;
     private Button btDone;
+    private RelativeLayout rlProcessing;
 
     StringBuilder listCompletedDish = new StringBuilder("");
 
@@ -86,10 +89,11 @@ public class DishFragment extends Fragment {
         btDone = (Button) view.findViewById(R.id.btDone);
 
         btDone.setOnClickListener(v -> {
-            if (listCompletedDish.length() > 0) {
+            if (listCompletedDish.toString().trim().length() > 0) {
+                showProcessing();
                 Services services = getService();
                 String listDishParam = listCompletedDish.deleteCharAt(listCompletedDish.length() - 1).toString();
-                listDishParam =  listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
+                listDishParam = listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
                 listCompletedDish = new StringBuilder(listDishParam);
                 services.markListDishDone(listDishParam)
                         .enqueue(new Callback<StatusResponse>() {
@@ -103,20 +107,22 @@ public class DishFragment extends Fragment {
                                             int dishId = Integer.parseInt(id[1]);
                                             removeDishIsCooked(dishId);
                                         }
-                                        refreshListViewDish();
                                         listCompletedDish = new StringBuilder("");
                                     }
                                 }
+                                hideProcessing();
                             }
 
                             @Override
                             public void onFailure(Call<StatusResponse> call, Throwable t) {
-
+                                hideProcessing();
                             }
                         });
             }
 
         });
+        rlProcessing = (RelativeLayout) view.findViewById(R.id.rlProcessing);
+        hideProcessing();
         return view;
     }
 
@@ -136,11 +142,15 @@ public class DishFragment extends Fragment {
             @Override
             public void onNotDoneClick(int dishId) {
                 String[] listDish = listCompletedDish.toString().split(";");
-                listCompletedDish = new StringBuilder("");
-                for (String cookedDish : listDish) {
-                    if (!cookedDish.contains("_" + dishId)) {
-                        listCompletedDish.append(cookedDish)
-                                .append(";");
+                if (listDish.length != 0 && !listCompletedDish.toString().equals("")) {
+                    listCompletedDish = new StringBuilder("");
+                    for (String cookedDish : listDish) {
+                        String[] items = cookedDish.split("_");
+                        String currentOrderID = String.valueOf(DishFragment.this.getOrderIdByDish(dishId));
+                        if (!items[1].equals("" + dishId) && !currentOrderID.equals(items[0])) {
+                            listCompletedDish.append(cookedDish)
+                                    .append(";");
+                        }
                     }
                 }
             }
@@ -211,13 +221,42 @@ public class DishFragment extends Fragment {
     }
 
     public void removeDishIsCooked(int dishId) {
+        boolean isChange = false;
+        LinkedList<DishInQueue> newQueueDish = new LinkedList<>();
         for (DishInQueue dishInQueue : queueDish) {
-            if (dishInQueue.getDish().getDishId() == dishId) {
-                queueDish.remove(dishInQueue);
-                break;
+            if (dishInQueue.getDish().getDishId() != dishId) {
+                newQueueDish.add(dishInQueue);
+            } else {
+                if (!isChange) {
+                    isChange = true;
+                } else {
+                    newQueueDish.add(dishInQueue);
+                }
             }
         }
-        //refreshListViewDish();
+        if (isChange) {
+            queueDish = newQueueDish;
+            refreshListViewDish();
+        }
+    }
+
+    public void updateDishIsNotAvailable(List<Integer> integers) {
+        boolean isChange = false;
+        LinkedList<DishInQueue> newQueueDish = new LinkedList<>();
+        for (DishInQueue dishInQueue : queueDish) {
+            if (!integers.contains(dishInQueue.getDish().getOrderDetailId())) {
+                newQueueDish.add(dishInQueue);
+//                isChange = true;
+            } else {
+                if (false == isChange) {
+                    isChange = true;
+                }
+            }
+        }
+        if (isChange) {
+            queueDish = newQueueDish;
+            refreshListViewDish();
+        }
     }
 
     public void addNewQueue(DishInQueue queue) {
@@ -250,5 +289,48 @@ public class DishFragment extends Fragment {
         if (null != dishQueueAdapter) {
             dishQueueAdapter.getFilter().filter(term);
         }
+    }
+
+    public void updateDishNotAvailable(List<Integer> list) {
+        if (null != list) {
+            if (list.size() > 0) {
+                updateDishIsNotAvailable(list);
+                notifyUpdateDishInChefComplete(list);
+            }
+        }
+    }
+
+    private void notifyUpdateDishInChefComplete(List<Integer> list) {
+        StringBuilder params = new StringBuilder();
+        for (Integer id : list) {
+            params.append(String.valueOf(id))
+                    .append("_");
+        }
+
+        String formatParams = params.deleteCharAt(params.length() - 1).toString();
+        Services services = getService();
+        services.postNotifyDishNotAvailable(formatParams).enqueue(new Callback<StatusResponse>() {
+            @Override
+            public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                if (response.isSuccessful()) {
+                    if (null != response.body()) {
+                        ToastUtils.toastShortMassage(DishFragment.this.getContext(), "Notify update Success");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StatusResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void showProcessing() {
+        rlProcessing.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProcessing() {
+        rlProcessing.setVisibility(View.GONE);
     }
 }

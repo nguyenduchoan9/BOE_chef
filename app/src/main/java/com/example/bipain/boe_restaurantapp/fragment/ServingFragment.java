@@ -12,19 +12,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.SchedulerThread;
 import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
 import com.example.bipain.boe_restaurantapp.adapter.DishServeAdatper;
 import com.example.bipain.boe_restaurantapp.model.DishNotification;
+import com.example.bipain.boe_restaurantapp.model.StatusResponse;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
+import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subjects.PublishSubject;
 
@@ -42,6 +49,9 @@ public class ServingFragment extends Fragment {
     @BindView(R.id.rvDish)
     RecyclerView rvDish;
     DishServeAdatper mAdapter;
+    Services services;
+    @BindView(R.id.rlProcessing)
+    RelativeLayout rlProcessing;
 
     public ServingFragment() {
         // Required empty public constructor
@@ -50,8 +60,29 @@ public class ServingFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        services = getServices();
         mAdapter = new DishServeAdatper();
-        mAdapter.setListner(() -> setTotal());
+        mAdapter.setListner((pos, notify) -> {
+            showProcessing();
+            services.markOrderDetailServed(notify.getOrderDetailId()).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            setTotal();
+                            getMySchedulerThread().addServedItem(notify);
+                            mAdapter.removeData(notify);
+                        }
+                    }
+                    hideProcessing();
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    hideProcessing();
+                }
+            });
+        });
         myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
@@ -86,8 +117,8 @@ public class ServingFragment extends Fragment {
         rvDish.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                int a = ((LinearLayoutManager)manager).findFirstVisibleItemPosition();
-                ((LinearLayoutManager)manager).findLastVisibleItemPosition();
+                int a = ((LinearLayoutManager) manager).findFirstVisibleItemPosition();
+                ((LinearLayoutManager) manager).findLastVisibleItemPosition();
             }
         });
 
@@ -169,5 +200,25 @@ public class ServingFragment extends Fragment {
             notifications.add(waiterNotification);
         }
         return notifications;
+    }
+
+    private Services getServices() {
+        return ((WaiterActivity) getActivity()).getServices();
+    }
+
+    private void showProcessing() {
+        rlProcessing.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProcessing() {
+        rlProcessing.setVisibility(View.GONE);
+    }
+    private SchedulerThread getMySchedulerThread(){
+        return ((WaiterActivity) getActivity()).getMyScheduler();
+    }
+
+    public void updateFromTable(List<TableGroupServe> listOD){
+        mAdapter.removeInDerictFromTable(listOD);
+        setTotal();
     }
 }

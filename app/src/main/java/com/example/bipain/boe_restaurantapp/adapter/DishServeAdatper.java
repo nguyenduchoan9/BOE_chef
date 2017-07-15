@@ -3,6 +3,7 @@ package com.example.bipain.boe_restaurantapp.adapter;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
 import java.util.ArrayList;
@@ -51,12 +53,51 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
     private int findPos(WaiterNotification item) {
         for (int i = 0; i < waiterNotifications.size(); i++) {
             WaiterNotification needItem = waiterNotifications.get(i);
-            if (item.getDish().getDishId() == needItem.getDish().getDishId()
-                    && (item.getTiming().getTime() - needItem.getTiming().getTime()) == 0) {
+            if (item.getTiming() == needItem.getTiming()
+                    && item.getOrderDetailId() == needItem.getOrderDetailId()) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public void removeInDerictFromTable(List<TableGroupServe> listOD) {
+        if (null != listOD) {
+            if (listOD.size() > 0) {
+                Log.d("dishremove", "list size " + listOD.size());
+                for (int i = 0; i < listOD.size(); i++) {
+                    int timeLoop = listOD.get(i).quantityCountInFragment;
+                    boolean flagContinue = true;
+                    while (false != flagContinue) {
+                        int od = listOD.get(i).orderDetailId;
+                        int postInAdapter = findPostByOrderDetailId(od);
+                        Log.d("dishremove", "No. " + i
+                                + "--" + "OD " + od + "--" + "posAd " + postInAdapter);
+                        if (-1 != postInAdapter) {
+                            Log.d("dishremove", "found");
+                            listOD.get(i).quantityCountInFragment -= 1;
+                            waiterNotifications.remove(postInAdapter);
+                            notifyItemRemoved(postInAdapter);
+                        } else {
+                            timeLoop -= 1;
+                            if (timeLoop == 0)
+                                flagContinue = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private int findPostByOrderDetailId(int orderDetailId) {
+        for (int i = 0; i < waiterNotifications.size(); i++) {
+            WaiterNotification needItem = waiterNotifications.get(i);
+            if (orderDetailId == needItem.getOrderDetailId()) {
+                return i;
+            }
+        }
+        return -1;
+
     }
 
     @Override
@@ -118,9 +159,7 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
         private void initView() {
             tvServe.setOnClickListener(v -> {
                 int pos = getAdapterPosition();
-                waiterNotifications.remove(pos);
-                notifyItemRemoved(pos);
-                listner.onServeClick();
+                listner.onServeClick(pos, waiterNotifications.get(pos));
             });
         }
     }
@@ -132,7 +171,7 @@ public class DishServeAdatper extends RecyclerView.Adapter<DishServeAdatper.View
     }
 
     public interface WaiterListner {
-        void onServeClick();
+        void onServeClick(int id, WaiterNotification notification);
     }
 
     private WaiterListner listner;

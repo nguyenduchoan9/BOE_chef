@@ -23,4 +23,6 @@
             android:textStyle="bold"
             android:textColor="@color/holoRedLight"
             android:layout_marginTop="0dp"/>
+
+        <include layout="@layout/layout_processing"/>
 </RelativeLayout>

@@ -11,12 +11,20 @@ public class Dish {
     private int dishId;
     @SerializedName("dish_name")
     private String name;
+    @SerializedName("order_detail_id")
+    private int orderDetailId;
+
+    public int getOrderDetailId() {
+        return orderDetailId;
+    }
+
     private int categoryId;
 
     public Dish(int dishId, String name) {
         this.dishId = dishId;
         this.name = name;
     }
+
     public Dish(int dishId, String name, int categoryId) {
         this.dishId = dishId;
         this.name = name;

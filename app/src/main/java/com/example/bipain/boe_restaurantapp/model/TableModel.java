@@ -10,14 +10,14 @@ import java.util.List;
 public class TableModel {
     @SerializedName("table_number")
     private int tableNumber;
-    @SerializedName("dishes")
-    private List<DishSeri> dishSeris;
+    @SerializedName("dish_detail")
+    private List<DishTableInfo> dishList;
 
     public int getTableNumber() {
         return tableNumber;
     }
 
-    public List<DishSeri> getDishSeris() {
-        return dishSeris;
+    public List<DishTableInfo> getDishList() {
+        return dishList;
     }
 }

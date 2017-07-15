@@ -9,11 +9,17 @@ import java.util.Date;
  */
 
 public class WaiterNotification {
+    @SerializedName("order_detail_id")
+    private int orderDetailId;
     @SerializedName("table_number")
     private int tableNumber;
     @SerializedName("dish")
     private DishNotification dish;
     private boolean isNotifyToShort = false;
+
+    public int getOrderDetailId() {
+        return orderDetailId;
+    }
 
     public void setNotifiedShort(){
         isNotifyToShort = true;

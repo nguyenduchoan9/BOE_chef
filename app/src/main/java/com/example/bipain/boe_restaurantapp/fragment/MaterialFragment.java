@@ -1,10 +1,8 @@
 package com.example.bipain.boe_restaurantapp.fragment;
 
-import android.app.Service;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.activities.TabManagerActivity;
 import com.example.bipain.boe_restaurantapp.adapter.MaterialAdapter;
@@ -19,7 +18,6 @@ import com.example.bipain.boe_restaurantapp.model.Material;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
-import com.example.bipain.boe_restaurantapp.utils.ItemDecorationAlbumColumns;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +34,8 @@ public class MaterialFragment extends Fragment {
     RecyclerView rvMaterial;
     MaterialAdapter materialAdapter;
     private boolean init = true;
+    @BindView(R.id.rlProcessing)
+    RelativeLayout rlProcessing;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,20 +48,19 @@ public class MaterialFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.activity_menu_fragment, container, false);
         unbinder = ButterKnife.bind(this, view);
+
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        hideProcessing();
         materialAdapter = new MaterialAdapter(new ArrayList<>(), getContext());
-        materialAdapter.setListener(new MaterialAdapter.MaterialAapterListener() {
-            @Override
-            public void onCheckClick(boolean status, int id) {
-                if (status) {
-                    markAvailable(id);
-                } else {
-                    markNotAvailable(id);
-                }
+        materialAdapter.setListener((status, id) -> {
+            if (status) {
+                markAvailable(id);
+            } else {
+                markNotAvailable(id);
             }
         });
         RecyclerView.LayoutManager layoutManager =
@@ -74,39 +73,45 @@ public class MaterialFragment extends Fragment {
     }
 
     private void markAvailable(int id) {
+        showProcessing();
         Services services = getServices();
         services.markMaterialAvailable(id).enqueue(new Callback<StatusResponse>() {
             @Override
             public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
                 if (response.isSuccessful()) {
                     if (null != response.body()) {
-                        ToastUtils.toastShortMassage(getContext(), "not available");
+
                     }
                 }
+                hideProcessing();
             }
 
             @Override
             public void onFailure(Call<StatusResponse> call, Throwable t) {
-
+                hideProcessing();
             }
         });
     }
 
     private void markNotAvailable(int id) {
+        showProcessing();
         Services services = getServices();
-        services.markMaterialNotAvailable(id).enqueue(new Callback<StatusResponse>() {
+        services.markMaterialNotAvailable(id).enqueue(new Callback<List<Integer>>() {
             @Override
-            public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+            public void onResponse(Call<List<Integer>> call, Response<List<Integer>> response) {
                 if (response.isSuccessful()) {
                     if (null != response.body()) {
-                        ToastUtils.toastShortMassage(getContext(), "not avaiable");
+//                        ToastUtils.toastShortMassage(getContext(), "not available");
+
+                        notifyDishServing(response.body());
                     }
                 }
+                hideProcessing();
             }
 
             @Override
-            public void onFailure(Call<StatusResponse> call, Throwable t) {
-
+            public void onFailure(Call<List<Integer>> call, Throwable t) {
+                hideProcessing();
             }
         });
     }
@@ -155,5 +160,17 @@ public class MaterialFragment extends Fragment {
             ((TabManagerActivity) getActivity()).setFragmentPos(1);
         }
         init = !init;
+    }
+
+    private void notifyDishServing(List<Integer> integers) {
+        ((TabManagerActivity) getActivity()).notifyDishNotAvailable(integers);
+    }
+
+    private void showProcessing() {
+        rlProcessing.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProcessing() {
+        rlProcessing.setVisibility(View.GONE);
     }
 }

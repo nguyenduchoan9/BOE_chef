@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.model.User;
@@ -36,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     private EndpointManager endpointManager;
     private Retrofit apiService;
     private Services services;
+    @BindView(R.id.rlProcessing)
+    RelativeLayout rlProcessing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginAsWaiter() {
+        showProcessing();
         LoginUserParam userParam = new LoginUserParam("masterwaiter", "12345678");
         services.loginAsChef(userParam).enqueue(new Callback<User>() {
             @Override
@@ -83,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                             ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
                         }
                     }
+                    hideProcessing();
                 }
             }
 
@@ -100,6 +106,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginAsChef() {
+        showProcessing();
         LoginUserParam userParam = new LoginUserParam("masterchef", "12345678");
         services.loginAsChef(userParam).enqueue(new Callback<User>() {
             @Override
@@ -115,6 +122,7 @@ public class LoginActivity extends AppCompatActivity {
                             ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
                         }
                     }
+                    hideProcessing();
                 }
             }
 
@@ -149,5 +157,13 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void showProcessing() {
+        rlProcessing.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProcessing() {
+        rlProcessing.setVisibility(View.GONE);
     }
 }

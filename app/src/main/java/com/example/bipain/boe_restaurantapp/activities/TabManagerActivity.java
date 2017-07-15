@@ -37,6 +37,7 @@ import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -421,5 +422,12 @@ public class TabManagerActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    public void notifyDishNotAvailable(List<Integer> integerList){
+        if (null != adapter) {
+            DishFragment fragment = (DishFragment) adapter.getItem(0);
+            fragment.updateDishNotAvailable(integerList);
+        }
     }
 }

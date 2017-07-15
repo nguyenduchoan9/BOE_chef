@@ -2,6 +2,7 @@ package com.example.bipain.boe_restaurantapp.activities;
 
 import android.os.Handler;
 import android.os.Message;
+import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,9 @@ import java.util.List;
 public class SchedulerThread implements Runnable {
     private String LOG_TAG = "XXXSCHEDULER";
     private List<WaiterNotification> itemTiming = new ArrayList<>();
-    private List<WaiterNotification> itemTimingMore = new ArrayList<>();
+    private List<WaiterNotification> itemTimingPlus = new ArrayList<>();
+    private List<WaiterNotification> itemServed = new ArrayList<>();
+    private List<TableGroupServe> dishTableServed = new ArrayList<>();
     private Handler myHandler;
     private Handler handleLongTime;
 
@@ -30,7 +33,7 @@ public class SchedulerThread implements Runnable {
     }
 
     public void addItem(WaiterNotification timing) {
-        itemTimingMore.add(timing);
+        itemTimingPlus.add(timing);
     }
 
     private boolean flagStop = true;
@@ -39,11 +42,55 @@ public class SchedulerThread implements Runnable {
         this.flagStop = false;
     }
 
+    public void addServedItem(WaiterNotification notification) {
+        itemServed.add(notification);
+    }
+
+    public void setItemTableServed(List<TableGroupServe> served) {
+        dishTableServed.addAll(served);
+    }
+
     @Override
     public void run() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 //        while (flagStop) {
         if (null != itemTiming) {
+            if (itemServed.size() > 0) {
+                for (WaiterNotification served : itemServed) {
+                    int pos = -1;
+                    for (int i = 0; i < itemTiming.size(); i++) {
+                        WaiterNotification current = itemTiming.get(i);
+                        if (served.getOrderDetailId() == current.getOrderDetailId()
+                                && served.getTiming() == current.getTiming()) {
+                            pos = i;
+                            break;
+                        }
+                    }
+                    if (-1 != pos) {
+                        itemTiming.remove(pos);
+                    }
+                }
+                itemServed.clear();
+            }
+            if (dishTableServed.size() > 0) {
+                for (int x = 0; x < dishTableServed.size(); x++) {
+                    int dishServedOD = dishTableServed.get(x).orderDetailId;
+                    int pos = -1;
+                    for (int abc = 0; abc < dishTableServed.get(x).quantityCountInFragment; abc++) {
+                        for (int i = 0; i < itemTiming.size(); i++) {
+                            WaiterNotification current = itemTiming.get(i);
+                            if (dishServedOD == current.getOrderDetailId()) {
+                                pos = i;
+                                break;
+                            }
+                        }
+                        if (-1 != pos) {
+                            itemTiming.remove(pos);
+                        }
+                    }
+                }
+                dishTableServed.clear();
+            }
             if (itemTiming.size() > 0) {
                 List<WaiterNotification> newList = new ArrayList<>();
                 for (WaiterNotification timing : itemTiming) {
@@ -70,12 +117,12 @@ public class SchedulerThread implements Runnable {
                 }
                 itemTiming = newList;
             }
-            if (itemTimingMore.size() > 0) {
-                itemTiming.addAll(itemTimingMore);
-                itemTimingMore = new ArrayList<>();
+            if (itemTimingPlus.size() > 0) {
+                itemTiming.addAll(itemTimingPlus);
+                itemTimingPlus = new ArrayList<>();
             }
         }
-        myHandler.postDelayed(this, 500);
+        myHandler.postDelayed(this, 400);
 //        }
     }
 }
