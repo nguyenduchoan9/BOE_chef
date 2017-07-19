@@ -67,8 +67,8 @@ public class WarningFragment extends Fragment {
                 public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
                     if (response.isSuccessful()) {
                         if (null != response.body()) {
-                            setTotal();
                             mAdapter.removeData(notify);
+                            setTotal();
                         }
                     }
                     hideProcessing();

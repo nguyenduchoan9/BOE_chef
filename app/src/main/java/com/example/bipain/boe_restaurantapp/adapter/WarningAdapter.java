@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
-import com.example.bipain.boe_restaurantapp.utils.Constant;
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -53,7 +52,7 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
     private int findPos(WaiterNotification item) {
         for (int i = 0; i < waiterNotifications.size(); i++) {
             WaiterNotification needItem = waiterNotifications.get(i);
-            if (item.getTiming() == needItem.getTiming()
+            if (item.getUid() == needItem.getUid()
                     && item.getOrderDetailId() == item.getOrderDetailId()) {
                 return i;
             }
@@ -109,12 +108,8 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
         WaiterNotification item = waiterNotifications.get(position);
         holder.tvDishNam.setText(item.getDish().getDishName());
         holder.tvTableNumber.setText("Table No." + String.valueOf(item.getTableNumber()));
-        if (Constant.OVER_TIME == item.getType() && !item.isNotify()) {
-            holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWarning));
-            item.setNotified();
-        } else if (item.isNotify()) {
-            holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorWarning));
-        }
+
+        holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.holoOrangeLight));
     }
 
     @Override

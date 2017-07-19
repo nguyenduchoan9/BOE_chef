@@ -2,6 +2,7 @@ package com.example.bipain.boe_restaurantapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -65,31 +67,35 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             viewlHolder = (ViewHolder) convertView.getTag();
         }
 
-        DishInOrder dish = new DishInOrder();
-        dish = data.get(position);
+        DishInOrder dish = data.get(position);
 
         viewlHolder.txtDishName.setText(dish.getDish().getName());
         viewlHolder.txtQuantity.setText(String.valueOf(dish.getQuantity()));
         viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
-        viewlHolder.chkDone.setChecked(false);
-        DishInOrder finalDish = dish;
-        viewlHolder.chkDone.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    listener.onDoneClick(finalDish.getDish().getDishId());
-                }else {
-                    listener.onNotDoneClick(finalDish.getDish().getDishId());
-                }
+        viewlHolder.chkDone.setOnCheckedChangeListener(null);
+        viewlHolder.chkDone.setChecked(dish.isChecked());
+        viewlHolder.chkDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            dish.setChecked(isChecked);
+            if (isChecked) {
+                Log.d("Hoang", "getView: true");
+                listener.onDoneClick(dish.getDish().getDishId(), dish.getIdentity());
+            } else {
+                Log.d("Hoang", "getView: false");
+                listener.onNotDoneClick(dish.getDish().getDishId(), dish.getIdentity());
             }
         });
+        ViewHolder finalViewlHolder = viewlHolder;
 //        viewlHolder.chkDone.setOnClickListener(v -> {
-//                    if (viewlHolder.chkDone.isChecked()) {
-//
-//                    }
-//                }
-//        );
-
+//            boolean isChecked = finalViewlHolder.chkDone.isChecked();
+//            dish.setChecked(isChecked);
+//            if (isChecked) {
+//                Log.d("Hoang", "getView: true");
+//                listener.onDoneClick(finalDish.getDish().getDishId(), finalDish.getIdentity());
+//            } else {
+//                Log.d("Hoang", "getView: false");
+//                listener.onNotDoneClick(finalDish.getDish().getDishId(), finalDish.getIdentity());
+//            }
+//        });
         return convertView;
     }
 
@@ -112,9 +118,9 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
     }
 
     public interface DishQueueAdapterListener {
-        void onDoneClick(int dishId);
+        void onDoneClick(int dishId, Date identify);
 
-        void onNotDoneClick(int dishId);
+        void onNotDoneClick(int dishId, Date identify);
     }
 
     private DishQueueAdapterListener listener;
@@ -150,9 +156,9 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
                     if (lowerName.contains(lowerTerm)) {
                         filterDish.add(dish);
                     }
-                    filterResults.values = filterDish;
-                    filterResults.count = filterDish.size();
                 }
+                filterResults.values = filterDish;
+                filterResults.count = filterDish.size();
             }
             return filterResults;
         }

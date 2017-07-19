@@ -19,13 +19,17 @@ import com.example.bipain.boe_restaurantapp.activities.SchedulerThread;
 import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
 import com.example.bipain.boe_restaurantapp.adapter.DishServeAdatper;
 import com.example.bipain.boe_restaurantapp.model.DishNotification;
+import com.example.bipain.boe_restaurantapp.model.GroupDishByTable;
+import com.example.bipain.boe_restaurantapp.model.ServingDishGroup;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -52,6 +56,8 @@ public class ServingFragment extends Fragment {
     Services services;
     @BindView(R.id.rlProcessing)
     RelativeLayout rlProcessing;
+
+    private List<WaiterNotification> orginData;
 
     public ServingFragment() {
         // Required empty public constructor
@@ -213,12 +219,51 @@ public class ServingFragment extends Fragment {
     private void hideProcessing() {
         rlProcessing.setVisibility(View.GONE);
     }
-    private SchedulerThread getMySchedulerThread(){
+
+    private SchedulerThread getMySchedulerThread() {
         return ((WaiterActivity) getActivity()).getMyScheduler();
     }
 
-    public void updateFromTable(List<TableGroupServe> listOD){
+    public void updateFromTable(List<TableGroupServe> listOD) {
         mAdapter.removeInDerictFromTable(listOD);
         setTotal();
+    }
+
+    private void groupDishByTable() {
+        orginData;
+        List<ServingDishGroup> adapterData = new ArrayList<>();
+        List<Integer> dishIdList = new ArrayList<>();
+        if (0 < orginData.size()) {
+            do {
+                Map<Integer, GroupDishByTable> tableQuantity = new HashMap<>();
+                int currentDishId = -1;
+                String dishName = null;
+                for (WaiterNotification noti : orginData) {
+                    int dishIdComp = noti.getDish().getDishId();
+                    if (-1 != dishIdList.indexOf(dishIdComp)) {
+                        if (-1 == currentDishId && null == dishName) {
+                            currentDishId = dishIdComp;
+                            dishName = noti.getDish().getDishName();
+                            dishIdList.add(currentDishId);
+                        }
+                        if (dishIdComp == currentDishId) {
+                            int key = noti.getTableNumber();
+                            if (tableQuantity.containsKey(key)) {
+                                // containing table number
+                                GroupDishByTable value = tableQuantity.get(key);
+                                value.setQuantity(value.getQuantity() + 1);
+                                value.getUids().add(noti.getUid());
+                                tableQuantity.put(key, value);
+                            } else {
+                                // not contain
+                                GroupDishByTable value =
+                                        new GroupDishByTable(noti.getOrderDetailId(), key, noti.getUid());
+                                tableQuantity.put(key, value);
+                            }
+                        }
+                    }
+                }
+            } while (true);
+        }
     }
 }

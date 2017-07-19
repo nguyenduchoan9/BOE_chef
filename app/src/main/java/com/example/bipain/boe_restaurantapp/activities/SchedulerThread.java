@@ -61,7 +61,7 @@ public class SchedulerThread implements Runnable {
                     for (int i = 0; i < itemTiming.size(); i++) {
                         WaiterNotification current = itemTiming.get(i);
                         if (served.getOrderDetailId() == current.getOrderDetailId()
-                                && served.getTiming() == current.getTiming()) {
+                                && served.getUid() == current.getUid()) {
                             pos = i;
                             break;
                         }
@@ -102,8 +102,10 @@ public class SchedulerThread implements Runnable {
                             timing.setNotifyToWarning();
                             msg.obj = timing;
                             msg2.obj = timing;
-                            handleLongTime.sendMessage(msg2);
-                            myHandler.sendMessage(msg);
+                            if (!isInItemServe(timing)) {
+                                handleLongTime.sendMessage(msg2);
+                                myHandler.sendMessage(msg);
+                            }
                         }
                         newList.remove(newList.size() - 1);
                     } else if (timing.isWaitShort() && !timing.isNotifyToShort()) {
@@ -111,7 +113,9 @@ public class SchedulerThread implements Runnable {
                             Message msg = new Message();
                             timing.setNotifiedShort();
                             msg.obj = timing;
-                            myHandler.sendMessage(msg);
+                            if (!isInItemServe(timing)) {
+                                myHandler.sendMessage(msg);
+                            }
                         }
                     }
                 }
@@ -122,7 +126,19 @@ public class SchedulerThread implements Runnable {
                 itemTimingPlus = new ArrayList<>();
             }
         }
-        myHandler.postDelayed(this, 400);
+        myHandler.postDelayed(this, 200);
 //        }
+    }
+
+    private boolean isInItemServe(WaiterNotification noti) {
+        if (itemServed.size() > 0) {
+            for (WaiterNotification notification : itemServed) {
+                if (noti.getUid() == notification.getUid() &&
+                        noti.getOrderDetailId() == notification.getOrderDetailId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

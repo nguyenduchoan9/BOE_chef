@@ -16,6 +16,7 @@ public class WaiterNotification {
     @SerializedName("dish")
     private DishNotification dish;
     private boolean isNotifyToShort = false;
+    private Date uid;
 
     public int getOrderDetailId() {
         return orderDetailId;
@@ -26,7 +27,7 @@ public class WaiterNotification {
     }
 
     public boolean isNotifyToShort(){
-        return notify;
+        return isNotifyToShort;
     }
 
     private boolean isNotifyToWarning = false;
@@ -52,25 +53,25 @@ public class WaiterNotification {
         this.dish = dish;
     }
 
-    private Date timing;
 
-    public Date getTiming(){
-        return timing;
+
+    public Date getUid(){
+        return uid;
     }
 
     public void initCountTime() {
-        timing = new Date();
+        uid = new Date();
         type = Constant.IN_TIME;
     }
 
     public boolean isWaitShort() {
         Date currentTime = new Date();
-        return (currentTime.getTime() - timing.getTime()) > 20000;
+        return (currentTime.getTime() - uid.getTime()) > 20000;
     }
 
     public boolean isTooLong(){
         Date currentTime = new Date();
-        return (currentTime.getTime() - timing.getTime()) > 40000;
+        return (currentTime.getTime() - uid.getTime()) > 40000;
     }
 
     private int type;

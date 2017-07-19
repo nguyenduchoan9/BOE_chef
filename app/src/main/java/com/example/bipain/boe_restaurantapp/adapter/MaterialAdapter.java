@@ -45,8 +45,10 @@ public class MaterialAdapter extends RecyclerView.Adapter<MaterialAdapter.Materi
         Material material = getByPosition(position);
         holder.name.setText(material.getName());
         holder.isChecked.setChecked(material.isAvailable());
-        holder.isChecked.setOnCheckedChangeListener((buttonView, isChecked)
-                -> mListener.onCheckClick(isChecked, material.getId()));
+        holder.isChecked.setOnClickListener(v -> {
+            mListener.onCheckClick(holder.isChecked.isChecked(), material.getId());
+            material.setAvailable(holder.isChecked.isChecked());
+        });
     }
 
     @Override

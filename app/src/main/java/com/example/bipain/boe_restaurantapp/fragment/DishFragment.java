@@ -1,15 +1,17 @@
 package com.example.bipain.boe_restaurantapp.fragment;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import com.example.bipain.boe_restaurantapp.DishInOrder;
 import com.example.bipain.boe_restaurantapp.DishInQueue;
 import com.example.bipain.boe_restaurantapp.DishQueueAdapter;
@@ -19,18 +21,10 @@ import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
-
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -132,15 +126,17 @@ public class DishFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         dishQueueAdapter.setListener(new DishQueueAdapter.DishQueueAdapterListener() {
             @Override
-            public void onDoneClick(int dishId) {
+            public void onDoneClick(int dishId, Date identity) {
                 listCompletedDish.append(String.valueOf(DishFragment.this.getOrderIdByDish(dishId)))
                         .append("_")
                         .append(String.valueOf(dishId))
                         .append(";");
+                updateCheckInQueueDish(identity, true);
+
             }
 
             @Override
-            public void onNotDoneClick(int dishId) {
+            public void onNotDoneClick(int dishId, Date identity) {
                 String[] listDish = listCompletedDish.toString().split(";");
                 if (listDish.length != 0 && !listCompletedDish.toString().equals("")) {
                     listCompletedDish = new StringBuilder("");
@@ -153,6 +149,7 @@ public class DishFragment extends Fragment {
                         }
                     }
                 }
+                updateCheckInQueueDish(identity, false);
             }
         });
 //        dishQueueAdapter.setListener(dishId -> {
@@ -176,12 +173,24 @@ public class DishFragment extends Fragment {
 //        });
     }
 
+    private void updateCheckInQueueDish(Date identify, boolean isChecked){
+        for (DishInQueue dishInQueue : queueDish){
+            if(dishInQueue.isMe(identify)){
+                Log.d("Hoang", "update iden succc");
+                dishInQueue.setChecked(isChecked);
+                break;
+            }
+        }
+    }
+
     public void setDishInOrders() {
         if (null != queueDish && queueDish.size() > 0) {
             for (DishInQueue dishInQueue : queueDish) {
                 int quantity = 0;
                 DishInOrder dishInOrder = new DishInOrder();
                 dishInOrder.setDish(dishInQueue.getDish());
+                dishInOrder.setIdentity(dishInQueue.getIdentity());
+                dishInOrder.setChecked(dishInQueue.isChecked());
                 boolean isExited = false;
                 for (DishInOrder dish : dishInOrders) {
                     if (dish.getDish().getDishId() == dishInOrder.getDish().getDishId()) {
@@ -195,6 +204,7 @@ public class DishFragment extends Fragment {
                             quantity += 1;
                         }
                     }
+                    Log.d("Hoang", "setDishInOrders: " + quantity + " - " + String.valueOf(dishInOrder.isChecked()));
                     dishInOrder.setQuantity(quantity);
                     dishInOrders.add(dishInOrder);
                 }
@@ -207,7 +217,7 @@ public class DishFragment extends Fragment {
         setDishInOrders();
 //        lvDishInQueue.setAdapter(dishQueueAdapter);
         dishQueueAdapter.setData(dishInOrders);
-        dishQueueAdapter.notifyDataSetChanged();
+//        dishQueueAdapter.notifyDataSetChanged();
 //        lvDishInQueue.invalidateViews();
     }
 
@@ -260,6 +270,7 @@ public class DishFragment extends Fragment {
     }
 
     public void addNewQueue(DishInQueue queue) {
+        queue.setCurrentTime();
         queueDish.add(queue);
         refreshListViewDish();
     }
