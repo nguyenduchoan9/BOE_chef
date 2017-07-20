@@ -27,9 +27,14 @@ import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -57,7 +62,7 @@ public class ServingFragment extends Fragment {
     @BindView(R.id.rlProcessing)
     RelativeLayout rlProcessing;
 
-    private List<WaiterNotification> orginData;
+    private LinkedList<WaiterNotification> orginData = new LinkedList<>();
 
     public ServingFragment() {
         // Required empty public constructor
@@ -69,15 +74,17 @@ public class ServingFragment extends Fragment {
         services = getServices();
         mAdapter = new DishServeAdatper();
         mAdapter.setListner((pos, notify) -> {
+
             showProcessing();
-            services.markOrderDetailServed(notify.getOrderDetailId()).enqueue(new Callback<StatusResponse>() {
+            services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
                 @Override
                 public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
                     if (response.isSuccessful()) {
                         if (null != response.body()) {
+                            updateServeOrigin(notify);
                             setTotal();
-                            getMySchedulerThread().addServedItem(notify);
-                            mAdapter.removeData(notify);
+//                            getMySchedulerThread().addServedItem(notify);
+//                            mAdapter.removeData(notify);
                         }
                     }
                     hideProcessing();
@@ -93,18 +100,51 @@ public class ServingFragment extends Fragment {
             @Override
             public void handleMessage(Message msg) {
                 WaiterNotification i = (WaiterNotification) msg.obj;
+                int pos = findPostByOrderDetailId(i.getOrderDetailId());
                 if (i.isNotifyToWarning()) {
-                    mAdapter.removeData(i);
+                    if (-1 != pos) {
+                        orginData.remove(pos);
+                        groupDishByTable();
+                        setTotal();
+                    }
                 } else {
-                    mAdapter.notifyLongTime(i);
+                    if (-1 != pos) {
+                        orginData.get(pos).setNotifiedShort();
+                        groupDishByTable();
+                        setTotal();
+                    }
                 }
-                setTotal();
-//                Log.d(LOG_TAG, i.getDish().getDishName()
-//                        + "-"
-//                        + String.valueOf(i.getDish().getDishId()));
             }
         };
+    }
 
+    private String toServeParams(ServingDishGroup group) {
+        StringBuilder builder = new StringBuilder();
+        for (GroupDishByTable serve : group.getGroupDishByTableList()) {
+            builder.append(serve.getOrderDetailId())
+                    .append("_")
+                    .append(serve.getQuantity())
+                    .append(";");
+        }
+
+        return builder.deleteCharAt(builder.length() - 1).toString();
+    }
+
+    private void updateServeOrigin(ServingDishGroup group) {
+        List<WaiterNotification> updatedData = new ArrayList<>();
+        boolean isChange = false;
+        for (WaiterNotification noti : orginData) {
+            if (!group.isContainerOrderDetailId(noti.getOrderDetailId())) {
+                updatedData.add(noti);
+                getMySchedulerThread().addServedItem(noti);
+                if (!isChange) isChange = true;
+            }
+        }
+        if (isChange) {
+            orginData.clear();
+            orginData.addAll(updatedData);
+            groupDishByTable();
+        }
     }
 
     public Handler getMyHandler() {
@@ -138,7 +178,9 @@ public class ServingFragment extends Fragment {
     }
 
     private void setTotal() {
-        tvTotal.setText("Tổng số: " + String.valueOf(mAdapter.getItemCount()) + " dĩa");
+        if (null != orginData) {
+            tvTotal.setText("Tổng số: " + String.valueOf(orginData.size()) + " dĩa");
+        }
     }
 
     @Override
@@ -160,21 +202,15 @@ public class ServingFragment extends Fragment {
     public void onStart() {
         super.onStart();
         setTotal();
-//        for (WaiterNotification n : fakeData()) {
-//            try {
-//                Thread.sleep(500);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            addDataHandlerAndAdapter(n);
-//        }
     }
 
     public void addDataHandlerAndAdapter(WaiterNotification notification) {
         notification.initCountTime();
-        mAdapter.addData(notification);
+//        mAdapter.addData(notification);
+        orginData.add(notification);
         getSchduler().addItem(notification);
         setTotal();
+        groupDishByTable();
     }
 
     private SchedulerThread getSchduler() {
@@ -225,45 +261,107 @@ public class ServingFragment extends Fragment {
     }
 
     public void updateFromTable(List<TableGroupServe> listOD) {
-        mAdapter.removeInDerictFromTable(listOD);
+        Log.d("Hoang", "updateFromTable: before " + orginData.size());
+        if (removeInDerictFromTable(listOD)) {
+            Log.d("Hoang", "updateFromTable: inside " + orginData.size());
+            groupDishByTable();
+        }
         setTotal();
     }
 
-    private void groupDishByTable() {
-        orginData;
-        List<ServingDishGroup> adapterData = new ArrayList<>();
-        List<Integer> dishIdList = new ArrayList<>();
-        if (0 < orginData.size()) {
-            do {
-                Map<Integer, GroupDishByTable> tableQuantity = new HashMap<>();
-                int currentDishId = -1;
-                String dishName = null;
-                for (WaiterNotification noti : orginData) {
-                    int dishIdComp = noti.getDish().getDishId();
-                    if (-1 != dishIdList.indexOf(dishIdComp)) {
-                        if (-1 == currentDishId && null == dishName) {
-                            currentDishId = dishIdComp;
-                            dishName = noti.getDish().getDishName();
-                            dishIdList.add(currentDishId);
-                        }
-                        if (dishIdComp == currentDishId) {
-                            int key = noti.getTableNumber();
-                            if (tableQuantity.containsKey(key)) {
-                                // containing table number
-                                GroupDishByTable value = tableQuantity.get(key);
-                                value.setQuantity(value.getQuantity() + 1);
-                                value.getUids().add(noti.getUid());
-                                tableQuantity.put(key, value);
-                            } else {
-                                // not contain
-                                GroupDishByTable value =
-                                        new GroupDishByTable(noti.getOrderDetailId(), key, noti.getUid());
-                                tableQuantity.put(key, value);
-                            }
+    private boolean removeInDerictFromTable(List<TableGroupServe> listOD) {
+        boolean obserChange = false;
+        if (null != listOD) {
+            if (listOD.size() > 0) {
+                Log.d("Hoang", "remove: list size " + listOD.size());
+                for (int i = 0; i < listOD.size(); i++) {
+                    int timeLoop = listOD.get(i).quantityCountInFragment;
+                    Log.d("Hoang", "removeInDerictFromTable: before loop");
+                    boolean flagContinue = true;
+                    while (false != flagContinue) {
+                        int od = listOD.get(i).orderDetailId;
+                        int postInAdapter = findPostByOrderDetailId(od);
+                        Log.d("Hoang", "remove: No. " + i
+                                + "--" + "OD " + od + "--" + "posAd " + postInAdapter);
+                        if (-1 != postInAdapter) {
+                            listOD.get(i).quantityCountInFragment -= 1;
+                            orginData.remove(postInAdapter);
+                            if (!obserChange) obserChange = true;
+                        } else {
+                            Log.d("Hoang", "removeInDerictFromTable: in loop before" +timeLoop + String.valueOf(flagContinue));
+                            timeLoop -= 1;
+                            Log.d("Hoang", "removeInDerictFromTable: in loop after" +timeLoop+ String.valueOf(flagContinue));
+                            if (timeLoop <= 0)
+                                flagContinue = false;
                         }
                     }
                 }
-            } while (true);
+            }
+        }
+        return obserChange;
+    }
+
+    private int findPostByOrderDetailId(int od) {
+        for (int i = 0; i < orginData.size(); i++) {
+            WaiterNotification needItem = orginData.get(i);
+            if (od == needItem.getOrderDetailId()) {
+                return i;
+            }
+        }
+        return -1;
+
+    }
+
+    private void groupDishByTable() {
+        List<ServingDishGroup> adapterData = new ArrayList<>();
+        List<WaiterNotification> notGroup = new ArrayList<>();
+        List<WaiterNotification> processGroup = new ArrayList<>();
+        if (0 < orginData.size()) {
+            do {
+                processGroup = notGroup.size() == 0 ? orginData : notGroup;
+                notGroup = new ArrayList<>();
+                Map<Integer, GroupDishByTable> tableQuantity = new HashMap<>();
+                int currentDishId = -1;
+                String dishName = null;
+                for (WaiterNotification noti : processGroup) {
+                    int dishIdComp = noti.getDish().getDishId();
+                    if (-1 == currentDishId && null == dishName) {
+                        currentDishId = dishIdComp;
+                        dishName = noti.getDish().getDishName();
+                    }
+                    if (dishIdComp == currentDishId) {
+                        int key = noti.getTableNumber();
+                        if (tableQuantity.containsKey(key)) {
+                            // containing table number
+                            GroupDishByTable value = tableQuantity.get(key);
+                            value.setQuantity(value.getQuantity() + 1);
+                            value.getUids().add(noti.getUid());
+                            if (noti.isNotifyToShort()) {
+                                value.setShortNotify(true);
+                            }
+                            tableQuantity.put(key, value);
+                        } else {
+                            // not contain
+                            GroupDishByTable value =
+                                    new GroupDishByTable(noti.getOrderDetailId(), key, noti.getUid());
+                            if (noti.isNotifyToShort()) {
+                                value.setShortNotify(true);
+                            }
+                            tableQuantity.put(key, value);
+                        }
+                    } else {
+                        notGroup.add(noti);
+                    }
+                }
+                List<GroupDishByTable> grouped = new ArrayList<>(tableQuantity.values());
+                Collections.sort(grouped);
+                ServingDishGroup serve = new ServingDishGroup(currentDishId, dishName, grouped);
+                adapterData.add(serve);
+            } while (notGroup.size() != 0);
+            Collections.sort(adapterData, (o1, o2) -> o1.getDishName().compareTo(o2.getDishName()));
+            mAdapter.setData(adapterData);
+        } else {
+            mAdapter.setData(new ArrayList<>());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.bipain.boe_restaurantapp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,5 +40,23 @@ public class ServingDishGroup {
 
     public void setGroupDishByTableList(List<GroupDishByTable> groupDishByTableList) {
         this.groupDishByTableList = groupDishByTableList;
+    }
+
+    public void removeByOrderDetail(int orderDetailId) {
+        List<GroupDishByTable> newData = new ArrayList<>();
+        for (GroupDishByTable i : groupDishByTableList) {
+            if (i.getOrderDetailId() != orderDetailId){
+                newData.add(i);
+            }
+        }
+        this.groupDishByTableList.clear();
+        this.groupDishByTableList.addAll(newData);
+    }
+
+    public boolean isContainerOrderDetailId(int odId) {
+        for (GroupDishByTable i : groupDishByTableList) {
+            if (i.getOrderDetailId() == odId) return true;
+        }
+        return false;
     }
 }

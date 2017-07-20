@@ -72,7 +72,7 @@ public interface Services {
 
     @POST("orders/mark_order_detail_served")
     @FormUrlEncoded
-    Call<StatusResponse> markOrderDetailServed(@Field("order_detail_id") int ids);
+    Call<StatusResponse> markOrderDetailServed(@Field("order_detail_id") String ids);
 
     @POST("orders/mark_list_order_detail_served")
     @FormUrlEncoded

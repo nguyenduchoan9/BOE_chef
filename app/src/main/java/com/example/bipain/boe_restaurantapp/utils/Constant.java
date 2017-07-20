@@ -50,4 +50,10 @@ public class Constant {
     public final static int OVER_TIME = -1;
 
     public final static String LOG_TAG = "WTF";
+
+    public interface NotifyType{
+        int Normal = 0;
+        int Short = 1;
+        int Warning = 2;
+    }
 }

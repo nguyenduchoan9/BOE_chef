@@ -9,8 +9,10 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.model.ServingDishGroup;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
+import com.example.bipain.boe_restaurantapp.utils.Util;
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -21,19 +23,19 @@ import butterknife.ButterKnife;
  */
 
 public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHolder> {
-    List<WaiterNotification> waiterNotifications;
+    List<ServingDishGroup> waiterNotifications;
     private Context mContext;
 
     public WarningAdapter() {
         waiterNotifications = new ArrayList<>();
     }
 
-    public void setData(List<WaiterNotification> list) {
+    public void setData(List<ServingDishGroup> list) {
         this.waiterNotifications = list;
         notifyDataSetChanged();
     }
 
-    public void addData(WaiterNotification activity) {
+    public void addData(ServingDishGroup activity) {
 //        int pos = waiterNotifications.size();
         waiterNotifications.add(activity);
         notifyItemInserted(waiterNotifications.size());
@@ -41,60 +43,60 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
     }
 
     public void removeData(WaiterNotification item) {
-        int pos = findPos(item);
-        if (-1 != pos) {
-            waiterNotifications.remove(pos);
-            notifyItemRemoved(pos);
-        }
+//        int pos = findPos(item);
+//        if (-1 != pos) {
+//            waiterNotifications.remove(pos);
+//            notifyItemRemoved(pos);
+//        }
 
     }
 
-    private int findPos(WaiterNotification item) {
-        for (int i = 0; i < waiterNotifications.size(); i++) {
-            WaiterNotification needItem = waiterNotifications.get(i);
-            if (item.getUid() == needItem.getUid()
-                    && item.getOrderDetailId() == item.getOrderDetailId()) {
-                return i;
-            }
-        }
-        return -1;
-    }
+//    private int findPos(ServingDishGroup item) {
+//        for (int i = 0; i < waiterNotifications.size(); i++) {
+//            WaiterNotification needItem = waiterNotifications.get(i);
+//            if (item.getUid() == needItem.getUid()
+//                    && item.getOrderDetailId() == item.getOrderDetailId()) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//    }
 
-    public void removeInDerictFromTable(List<TableGroupServe> listOD) {
-        if (null != listOD) {
-            if (listOD.size() > 0) {
-                for (int i = 0; i < listOD.size(); i++) {
-                    int timeLoop = listOD.get(i).quantityCountInFragment;
-                    boolean flagContinue = true;
-                    while (false != flagContinue) {
-                        int od = listOD.get(i).orderDetailId;
-                        int postInAdapter = findPostByOrderDetailId(od);
-                        if (-1 != postInAdapter) {
-                            listOD.get(i).quantityCountInFragment -= 1;
-                            waiterNotifications.remove(postInAdapter);
-                            notifyItemRemoved(postInAdapter);
-                        } else {
-                            flagContinue = false;
-                            timeLoop -= 1;
-                            if (timeLoop == 0)
-                                flagContinue = false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private int findPostByOrderDetailId(int orderDetailId) {
-        for (int i = 0; i < waiterNotifications.size(); i++) {
-            WaiterNotification needItem = waiterNotifications.get(i);
-            if (orderDetailId == needItem.getOrderDetailId()) {
-                return i;
-            }
-        }
-        return -1;
-
-    }
+//    public void removeInDerictFromTable(List<TableGroupServe> listOD) {
+//        if (null != listOD) {
+//            if (listOD.size() > 0) {
+//                for (int i = 0; i < listOD.size(); i++) {
+//                    int timeLoop = listOD.get(i).quantityCountInFragment;
+//                    boolean flagContinue = true;
+//                    while (false != flagContinue) {
+//                        int od = listOD.get(i).orderDetailId;
+//                        int postInAdapter = findPostByOrderDetailId(od);
+//                        if (-1 != postInAdapter) {
+//                            listOD.get(i).quantityCountInFragment -= 1;
+//                            waiterNotifications.remove(postInAdapter);
+//                            notifyItemRemoved(postInAdapter);
+//                        } else {
+//                            flagContinue = false;
+//                            timeLoop -= 1;
+//                            if (timeLoop == 0)
+//                                flagContinue = false;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    private int findPostByOrderDetailId(int orderDetailId) {
+//        for (int i = 0; i < waiterNotifications.size(); i++) {
+//            WaiterNotification needItem = waiterNotifications.get(i);
+//            if (orderDetailId == needItem.getOrderDetailId()) {
+//                return i;
+//            }
+//        }
+//        return -1;
+//
+//    }
 
     @Override
     public WarningAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -105,11 +107,11 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(WarningAdapter.ViewHolder holder, int position) {
-        WaiterNotification item = waiterNotifications.get(position);
-        holder.tvDishNam.setText(item.getDish().getDishName());
-        holder.tvTableNumber.setText("Table No." + String.valueOf(item.getTableNumber()));
+        ServingDishGroup item = waiterNotifications.get(position);
+        holder.tvDishNam.setText(item.getDishName());
+        holder.tvTableNumber.setText(Util.setupTableGroupName(item.getGroupDishByTableList(), mContext));
 
-        holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.holoOrangeLight));
+//        holder.container.setBackgroundColor(ContextCompat.getColor(mContext, R.color.holoOrangeLight));
     }
 
     @Override
@@ -149,7 +151,7 @@ public class WarningAdapter extends RecyclerView.Adapter<WarningAdapter.ViewHold
     }
 
     public interface WaiterListner {
-        void onServeClick(int id, WaiterNotification notification);
+        void onServeClick(int id, ServingDishGroup notification);
 
     }
 

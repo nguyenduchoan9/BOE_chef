@@ -1,5 +1,7 @@
 package com.example.bipain.boe_restaurantapp.model;
 
+import android.support.annotation.NonNull;
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,11 +10,17 @@ import java.util.List;
  * Created by hoang on 19/07/2017.
  */
 
-public class GroupDishByTable {
+public class GroupDishByTable implements Comparable<GroupDishByTable> {
     private int orderDetailId;
     private int tableNumber;
     private List<Date> uids;
     private int quantity;
+    private boolean isShortNotify;
+    private boolean isWarning;
+
+
+    public GroupDishByTable() {
+    }
 
     public GroupDishByTable(int orderDetailId, int tableNumber, Date uid) {
         this.orderDetailId = orderDetailId;
@@ -20,6 +28,24 @@ public class GroupDishByTable {
         uids = new ArrayList<>();
         uids.add(uid);
         quantity = 1;
+        isShortNotify = false;
+        isWarning = false;
+    }
+
+    public boolean isWarning() {
+        return isWarning;
+    }
+
+    public void setWarning(boolean warning) {
+        isWarning = warning;
+    }
+
+    public boolean isShortNotify() {
+        return isShortNotify;
+    }
+
+    public void setShortNotify(boolean shortNotify) {
+        isShortNotify = shortNotify;
     }
 
     public int getOrderDetailId() {
@@ -52,5 +78,10 @@ public class GroupDishByTable {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public int compareTo(@NonNull GroupDishByTable o) {
+        return this.tableNumber - o.getTableNumber();
     }
 }

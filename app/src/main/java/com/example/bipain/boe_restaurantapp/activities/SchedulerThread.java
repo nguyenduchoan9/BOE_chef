@@ -5,6 +5,7 @@ import android.os.Message;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,10 +14,10 @@ import java.util.List;
 
 public class SchedulerThread implements Runnable {
     private String LOG_TAG = "XXXSCHEDULER";
-    private List<WaiterNotification> itemTiming = new ArrayList<>();
-    private List<WaiterNotification> itemTimingPlus = new ArrayList<>();
-    private List<WaiterNotification> itemServed = new ArrayList<>();
-    private List<TableGroupServe> dishTableServed = new ArrayList<>();
+    private LinkedList<WaiterNotification> itemTiming = new LinkedList<>();
+    private LinkedList<WaiterNotification> itemTimingPlus = new LinkedList<>();
+    private LinkedList<WaiterNotification> itemServed = new LinkedList<>();
+    private LinkedList<TableGroupServe> dishTableServed = new LinkedList<>();
     private Handler myHandler;
     private Handler handleLongTime;
 
@@ -28,7 +29,7 @@ public class SchedulerThread implements Runnable {
         this.myHandler = myHandler;
     }
 
-    public void setItemTiming(List<WaiterNotification> itemTiming) {
+    public void setItemTiming(LinkedList<WaiterNotification> itemTiming) {
         this.itemTiming = itemTiming;
     }
 
@@ -56,43 +57,50 @@ public class SchedulerThread implements Runnable {
 //        while (flagStop) {
         if (null != itemTiming) {
             if (itemServed.size() > 0) {
+                LinkedList<WaiterNotification> found = new LinkedList<>();
                 for (WaiterNotification served : itemServed) {
-                    int pos = -1;
+//                    int pos = -1;
                     for (int i = 0; i < itemTiming.size(); i++) {
                         WaiterNotification current = itemTiming.get(i);
                         if (served.getOrderDetailId() == current.getOrderDetailId()
                                 && served.getUid() == current.getUid()) {
-                            pos = i;
-                            break;
+//                            pos = i;
+                            if (-1 == found.indexOf(current))
+                                found.add(current);
+//                            break;
                         }
                     }
-                    if (-1 != pos) {
-                        itemTiming.remove(pos);
-                    }
+//                    if (-1 != pos) {
+//                        itemTiming.remove(pos);
+//                    }
                 }
+                if (found.size() > 0) itemTiming.removeAll(found);
                 itemServed.clear();
             }
             if (dishTableServed.size() > 0) {
                 for (int x = 0; x < dishTableServed.size(); x++) {
                     int dishServedOD = dishTableServed.get(x).orderDetailId;
-                    int pos = -1;
-                    for (int abc = 0; abc < dishTableServed.get(x).quantityCountInFragment; abc++) {
-                        for (int i = 0; i < itemTiming.size(); i++) {
-                            WaiterNotification current = itemTiming.get(i);
-                            if (dishServedOD == current.getOrderDetailId()) {
-                                pos = i;
-                                break;
+//                    int pos = -1;
+                    LinkedList<WaiterNotification> found = new LinkedList<>();
+//                    for (int abc = 0; abc < ; abc++) {
+                    for (int i = 0; i < itemTiming.size(); i++) {
+                        WaiterNotification current = itemTiming.get(i);
+                        if (dishServedOD == current.getOrderDetailId()) {
+//                                pos = i;
+                            if (-1 == found.indexOf(current)) {
+                                found.add(current);
+                                if (dishTableServed.get(x).quantityCountInThread == found.size())
+                                    break;
                             }
                         }
-                        if (-1 != pos) {
-                            itemTiming.remove(pos);
-                        }
                     }
+//                    }
+                    if (found.size() > 0) itemTiming.removeAll(found);
                 }
                 dishTableServed.clear();
             }
             if (itemTiming.size() > 0) {
-                List<WaiterNotification> newList = new ArrayList<>();
+                LinkedList<WaiterNotification> newList = new LinkedList<>();
                 for (WaiterNotification timing : itemTiming) {
                     newList.add(timing);
                     if (timing.isTooLong()) {
@@ -119,11 +127,12 @@ public class SchedulerThread implements Runnable {
                         }
                     }
                 }
-                itemTiming = newList;
+                itemTiming.clear();
+                itemTiming.addAll(newList);
             }
             if (itemTimingPlus.size() > 0) {
                 itemTiming.addAll(itemTimingPlus);
-                itemTimingPlus = new ArrayList<>();
+                itemTimingPlus = new LinkedList<>();
             }
         }
         myHandler.postDelayed(this, 200);
@@ -135,6 +144,13 @@ public class SchedulerThread implements Runnable {
             for (WaiterNotification notification : itemServed) {
                 if (noti.getUid() == notification.getUid() &&
                         noti.getOrderDetailId() == notification.getOrderDetailId()) {
+                    return true;
+                }
+            }
+        }
+        if (dishTableServed.size() > 0) {
+            for (TableGroupServe group : dishTableServed) {
+                if (noti.getOrderDetailId() == group.orderDetailId) {
                     return true;
                 }
             }
