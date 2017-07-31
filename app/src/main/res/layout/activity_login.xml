@@ -19,7 +19,7 @@
             style="@style/ChefLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="login as chef"/>
+            android:text="@string/text_btn_login_as_chef"/>
 
         <Button
             android:layout_marginTop="16dp"
@@ -27,16 +27,7 @@
             style="@style/WaiterLoginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Login as waiter"/>
-
-        <Button
-            android:layout_marginTop="16dp"
-            android:id="@+id/btnth"
-            android:visibility="gone"
-            style="@style/WaiterLoginButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Login as waiter"/>
+            android:text="@string/text_btn_login_as_waiter"/>
     </LinearLayout>
     <include layout="@layout/layout_processing"/>
 </RelativeLayout>

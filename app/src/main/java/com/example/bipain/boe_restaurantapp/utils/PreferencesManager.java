@@ -2,6 +2,7 @@ package com.example.bipain.boe_restaurantapp.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import com.example.bipain.boe_restaurantapp.model.HeaderCredential;
 import com.example.bipain.boe_restaurantapp.model.User;
 import com.google.gson.Gson;
@@ -15,6 +16,7 @@ public class PreferencesManager {
     private static final String USER = "USER";
     private static final String HEADERS = "HEADERS";
     private static final String TABLE_INFO = "TABLE_INFO";
+    private static final String LANGUAGE_INFO = "LANGUAGE_INFO";
     private SharedPreferences sharedPreferences;
     private Gson gson;
 
@@ -78,5 +80,15 @@ public class PreferencesManager {
 
     public String getRole() {
         return getUser().getRole();
+    }
+
+    public void setLanguage(String language) {
+        sharedPreferences.edit()
+                .putString(LANGUAGE_INFO, language)
+                .apply();
+    }
+
+    public String getLanguage() {
+        return sharedPreferences.getString(LANGUAGE_INFO, Constant.VI_LANGUAGE_STRING);
     }
 }

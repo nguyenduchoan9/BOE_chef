@@ -18,6 +18,8 @@ import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.TableModel;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
+import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
 import butterknife.BindView;
@@ -69,6 +71,19 @@ public class TableFragment extends Fragment {
         mAdapter = new TableAdapter(getContext());
         mAdapter.setListener((pos, orderDetailIdList, tableModel) -> {
             showProcessing();
+            markListOrderDetailServed(pos, orderDetailIdList, tableModel);
+        });
+        RecyclerView.LayoutManager manager = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.VERTICAL, false);
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(),
+                DividerItemDecoration.VERTICAL);
+        rvList.setLayoutManager(manager);
+        rvList.addItemDecoration(decoration);
+        rvList.setAdapter(mAdapter);
+    }
+
+    private void markListOrderDetailServed(int pos, String orderDetailIdList, TableModel tableModel) {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
             services.markListOrderDetailServed(orderDetailIdList).enqueue(new Callback<StatusResponse>() {
                 @Override
                 public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
@@ -89,6 +104,12 @@ public class TableFragment extends Fragment {
 
                             updateOtherFragment(tableGroupServes);
                         }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
                     }
                     hideProcessing();
                 }
@@ -96,16 +117,13 @@ public class TableFragment extends Fragment {
                 @Override
                 public void onFailure(Call<StatusResponse> call, Throwable t) {
                     hideProcessing();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
                 }
             });
-        });
-        RecyclerView.LayoutManager manager = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.VERTICAL, false);
-        DividerItemDecoration decoration = new DividerItemDecoration(getContext(),
-                DividerItemDecoration.VERTICAL);
-        rvList.setLayoutManager(manager);
-        rvList.addItemDecoration(decoration);
-        rvList.setAdapter(mAdapter);
+        } else {
+//            markListOrderDetailServed(pos, orderDetailIdList, tableModel);
+        }
+
     }
 
     private void updateOtherFragment(List<TableGroupServe> listOD) {
@@ -119,24 +137,36 @@ public class TableFragment extends Fragment {
     }
 
     private void loadData() {
-        Services services = getServices();
-        showProcessing();
-        services.getTable().enqueue(new Callback<List<TableModel>>() {
-            @Override
-            public void onResponse(Call<List<TableModel>> call, Response<List<TableModel>> response) {
-                if (response.isSuccessful()) {
-                    if (null != response.body()) {
-                        mAdapter.setData(response.body());
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            Services services = getServices();
+            showProcessing();
+            services.getTable().enqueue(new Callback<List<TableModel>>() {
+                @Override
+                public void onResponse(Call<List<TableModel>> call, Response<List<TableModel>> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            mAdapter.setData(response.body());
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
                     }
+                    hideProcessing();
                 }
-                hideProcessing();
-            }
 
-            @Override
-            public void onFailure(Call<List<TableModel>> call, Throwable t) {
-                hideProcessing();
-            }
-        });
+                @Override
+                public void onFailure(Call<List<TableModel>> call, Throwable t) {
+                    hideProcessing();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+//            loadData();
+        }
+
     }
 
     @Override

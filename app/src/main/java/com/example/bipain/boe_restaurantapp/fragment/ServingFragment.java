@@ -25,6 +25,7 @@ import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,31 +75,15 @@ public class ServingFragment extends Fragment {
         services = getServices();
         mAdapter = new DishServeAdatper();
         mAdapter.setListner((pos, notify) -> {
-
+            getMySchedulerThread().blockThread();
+            Log.d("Hoang", "onCreate: " + pos);
             showProcessing();
-            services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
-                @Override
-                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                    if (response.isSuccessful()) {
-                        if (null != response.body()) {
-                            updateServeOrigin(notify);
-                            setTotal();
-//                            getMySchedulerThread().addServedItem(notify);
-//                            mAdapter.removeData(notify);
-                        }
-                    }
-                    hideProcessing();
-                }
-
-                @Override
-                public void onFailure(Call<StatusResponse> call, Throwable t) {
-                    hideProcessing();
-                }
-            });
+            markOrderDetailServed(notify);
         });
         myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
+                getMySchedulerThread().blockThread();
                 WaiterNotification i = (WaiterNotification) msg.obj;
                 int pos = findPostByOrderDetailId(i.getOrderDetailId());
                 if (i.isNotifyToWarning()) {
@@ -114,8 +99,45 @@ public class ServingFragment extends Fragment {
                         setTotal();
                     }
                 }
+
+                getMySchedulerThread().releaseThread();
             }
         };
+    }
+
+    private void markOrderDetailServed(ServingDishGroup notify) {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            updateServeOrigin(notify);
+                            setTotal();
+//                            getMySchedulerThread().addServedItem(notify);
+//                            mAdapter.removeData(notify);
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
+                    }
+                    hideProcessing();
+                    getMySchedulerThread().releaseThread();
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    hideProcessing();
+                    getMySchedulerThread().releaseThread();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+//            markOrderDetailServed(notify);
+        }
     }
 
     private String toServeParams(ServingDishGroup group) {
@@ -131,18 +153,17 @@ public class ServingFragment extends Fragment {
     }
 
     private void updateServeOrigin(ServingDishGroup group) {
-        List<WaiterNotification> updatedData = new ArrayList<>();
+        List<WaiterNotification> removeData = new ArrayList<>();
         boolean isChange = false;
         for (WaiterNotification noti : orginData) {
-            if (!group.isContainerOrderDetailId(noti.getOrderDetailId())) {
-                updatedData.add(noti);
+            if (group.isContainerOrderDetailId(noti.getOrderDetailId())) {
+                removeData.add(noti);
                 getMySchedulerThread().addServedItem(noti);
                 if (!isChange) isChange = true;
             }
         }
         if (isChange) {
-            orginData.clear();
-            orginData.addAll(updatedData);
+            orginData.removeAll(removeData);
             groupDishByTable();
         }
     }
@@ -179,7 +200,9 @@ public class ServingFragment extends Fragment {
 
     private void setTotal() {
         if (null != orginData) {
-            tvTotal.setText("Tổng số: " + String.valueOf(orginData.size()) + " dĩa");
+            tvTotal.setText(getString(R.string.text_total)
+                    + String.valueOf(orginData.size())
+                    + (orginData.size() <= 1 ? getString(R.string.text_dish) : getString(R.string.text_dishes)));
         }
     }
 
@@ -205,12 +228,14 @@ public class ServingFragment extends Fragment {
     }
 
     public void addDataHandlerAndAdapter(WaiterNotification notification) {
+        getMySchedulerThread().blockThread();
         notification.initCountTime();
 //        mAdapter.addData(notification);
         orginData.add(notification);
         getSchduler().addItem(notification);
         setTotal();
         groupDishByTable();
+        getMySchedulerThread().releaseThread();
     }
 
     private SchedulerThread getSchduler() {
@@ -261,12 +286,14 @@ public class ServingFragment extends Fragment {
     }
 
     public void updateFromTable(List<TableGroupServe> listOD) {
+        getMySchedulerThread().blockThread();
         Log.d("Hoang", "updateFromTable: before " + orginData.size());
         if (removeInDerictFromTable(listOD)) {
             Log.d("Hoang", "updateFromTable: inside " + orginData.size());
             groupDishByTable();
         }
         setTotal();
+        getMySchedulerThread().releaseThread();
     }
 
     private boolean removeInDerictFromTable(List<TableGroupServe> listOD) {
@@ -288,9 +315,9 @@ public class ServingFragment extends Fragment {
                             orginData.remove(postInAdapter);
                             if (!obserChange) obserChange = true;
                         } else {
-                            Log.d("Hoang", "removeInDerictFromTable: in loop before" +timeLoop + String.valueOf(flagContinue));
+                            Log.d("Hoang", "removeInDerictFromTable: in loop before" + timeLoop + String.valueOf(flagContinue));
                             timeLoop -= 1;
-                            Log.d("Hoang", "removeInDerictFromTable: in loop after" +timeLoop+ String.valueOf(flagContinue));
+                            Log.d("Hoang", "removeInDerictFromTable: in loop after" + timeLoop + String.valueOf(flagContinue));
                             if (timeLoop <= 0)
                                 flagContinue = false;
                         }

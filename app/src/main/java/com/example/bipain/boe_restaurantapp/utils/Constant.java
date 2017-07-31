@@ -6,7 +6,7 @@ package com.example.bipain.boe_restaurantapp.utils;
 
 public class Constant {
     public static final String ID = "BOE";
-    public static String API_ENDPOINT = "http://192.168.0.108:3000";
+    public static String API_ENDPOINT = "http://192.168.0.108:3000/";
 
     public final static String INVALID_USERNAME_ERROR = "Username length must be in from 8 to 40 characters";
     public final static String INVALID_PASSWORD_ERROR = "Invalid password";
@@ -56,4 +56,8 @@ public class Constant {
         int Short = 1;
         int Warning = 2;
     }
+
+    public final static String LANGUAGE_KEY = "LANGUAGE_KEY";
+    public final static String VI_LANGUAGE_STRING = "vi";
+    public final static String EN_LANGUAGE_STRING = "en";
 }

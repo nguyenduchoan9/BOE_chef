@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
+import com.example.bipain.boe_restaurantapp.BuildConfig;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 
@@ -15,6 +16,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         endpointManager = new EndpointManager(this);
+        if (BuildConfig.IS_PROD) {
+            startActivity(LoginActivity.newInstance(this));
+        }
         EditText edtIP = (EditText) findViewById(R.id.edtIp);
         edtIP.setText(endpointManager.getEndpoint());
     }

@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.example.bipain.boe_restaurantapp.QueueOrder;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.adapter.PagerFragmentAdapter;
 import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
+import com.example.bipain.boe_restaurantapp.fragment.LanguageDialog;
 import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
 import com.example.bipain.boe_restaurantapp.gcm.GCMIntentService;
 import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
@@ -30,10 +32,12 @@ import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
 import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
+import com.example.bipain.boe_restaurantapp.utils.Util;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -62,6 +66,7 @@ public class TabManagerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Util.handleSelectLanguage(this, Util.getLanguage(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tab_manager);
 
@@ -72,21 +77,21 @@ public class TabManagerActivity extends AppCompatActivity {
 
         setBroadcastReceiver();
 
-        services.getUserProfile("abc", "id").enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        User user = response.body();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-
-            }
-        });
+//        services.getUserProfile("abc", "id").enqueue(new Callback<User>() {
+//            @Override
+//            public void onResponse(Call<User> call, Response<User> response) {
+//                if (response.isSuccessful()) {
+//                    if (response.body() != null) {
+//                        User user = response.body();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<User> call, Throwable t) {
+//
+//            }
+//        });
         queueDish = new LinkedList<>();
         orders = new LinkedList<>();
         categories = new ArrayList<>();
@@ -94,12 +99,13 @@ public class TabManagerActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.text_toolbar_title_chef);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         viewPager = (ViewPager) findViewById(R.id.viewPager);
-        adapter = new PagerFragmentAdapter(getSupportFragmentManager());
+        adapter = new PagerFragmentAdapter(getSupportFragmentManager(), this);
         viewPager.setAdapter(adapter);
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -113,12 +119,10 @@ public class TabManagerActivity extends AppCompatActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
             }
         });
 //        viewPager.getH
@@ -135,20 +139,28 @@ public class TabManagerActivity extends AppCompatActivity {
     }
 
     private void onLogOut() {
-        services.logout(preferencesManager.getUser().getId()).enqueue(new Callback<SessionDeleteResponse>() {
-            @Override
-            public void onResponse(Call<SessionDeleteResponse> call, Response<SessionDeleteResponse> response) {
-                if (response.isSuccessful()) {
-                    preferencesManager.logOut();
-                    startActivity(LoginActivity.newInstance(TabManagerActivity.this));
+        if (RetrofitUtils.checkNetworkAndServer(TabManagerActivity.this)) {
+            services.logout(preferencesManager.getUser().getId()).enqueue(new Callback<SessionDeleteResponse>() {
+                @Override
+                public void onResponse(Call<SessionDeleteResponse> call, Response<SessionDeleteResponse> response) {
+                    if (response.isSuccessful()) {
+                        preferencesManager.logOut();
+                        startActivity(LoginActivity.newInstance(TabManagerActivity.this));
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(TabManagerActivity.this, getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(TabManagerActivity.this, getString(R.string.text_response_error_msg));
+                        }
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SessionDeleteResponse> call, Throwable t) {
-
-            }
-        });
+                @Override
+                public void onFailure(Call<SessionDeleteResponse> call, Throwable t) {
+                    ToastUtils.toastLongMassage(TabManagerActivity.this, getString(R.string.text_response_error_connection));
+                }
+            });
+        }
     }
 
     public LinkedList<QueueOrder> getOrders() {
@@ -398,14 +410,45 @@ public class TabManagerActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem menuItem = menu.findItem(R.id.action_search);
+        MenuItem language = menu.findItem(R.id.action_language);
+        openSelectLanguageDialog(language);
         setUpSearchView(menuItem);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void openSelectLanguageDialog(MenuItem menuItem) {
+        menuItem.setOnMenuItemClickListener(item -> {
+            FragmentManager fm = getSupportFragmentManager();
+            LanguageDialog dialog = LanguageDialog.newInstance(preferencesManager.getLanguage());
+            dialog.setmListener(new LanguageDialog.LanguageListener() {
+                                    @Override
+                                    public void onEnglishSelect() {
+                                        preferencesManager.setLanguage(Constant.EN_LANGUAGE_STRING);
+                                        refreshViewAfterChangeLanguage();
+                                    }
+
+                                    @Override
+                                    public void onVNSelect() {
+                                        preferencesManager.setLanguage(Constant.VI_LANGUAGE_STRING);
+                                        refreshViewAfterChangeLanguage();
+                                    }
+                                }
+            );
+            dialog.show(fm, "putang");
+            return true;
+        });
+    }
+
+    private void refreshViewAfterChangeLanguage() {
+        finish();
+        startActivity(new Intent(this, TabManagerActivity.class));
     }
 
     private SearchView mSearchView;
 
     private void setUpSearchView(MenuItem menuItem) {
         mSearchView = (SearchView) menuItem.getActionView();
+        mSearchView.setQueryHint(getString(R.string.text_searching));
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -424,10 +467,15 @@ public class TabManagerActivity extends AppCompatActivity {
         });
     }
 
-    public void notifyDishNotAvailable(List<Integer> integerList){
+    public void notifyDishNotAvailable(List<Integer> integerList) {
         if (null != adapter) {
             DishFragment fragment = (DishFragment) adapter.getItem(0);
             fragment.updateDishNotAvailable(integerList);
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(MyContextWrapper.wrap(newBase, Util.getLanguage(newBase)));
     }
 }

@@ -8,26 +8,28 @@
     <string name="text_tab_dish">Dish</string>
     <string name="text_tab_material">Material</string>
     <string name="text_btn_done">Done</string>
+
     <string name="text_bottom_navi_table">Table</string>
     <string name="text_bottom_navi_attention">Attention</string>
     <string name="text_bottom_navi_serving">Serving</string>
-    <string name="text_dialog_language_apply">Áp dụng</string>
-    <string name="text_dialog_language_close">Đóng</string>
+
+    <string name="text_dialog_language_apply">Apply</string>
+    <string name="text_dialog_language_close">Close</string>
+
     <string name="text_toolbar_title_chef">Chef</string>
     <string name="text_toolbar_title_waiter">Waiter</string>
     <string name="text_menu_opt_language">Language</string>
+
     <string name="text_btn_login_as_chef">Login as waiter</string>
     <string name="text_btn_login_as_waiter">Login as waiter</string>
     <string name="text_processing">Processing...</string>
-    <string name="text_searching">Tìm kiếm...</string>
+    <string name="text_searching">Search...</string>
     <string name="text_item_serve">Serve</string>
-    <string name="text_dialog_select_language">Chọn ngôn ngữ</string>
-    <string name="text_total">Tổng số:&#160;</string>
-    <string name="text_dish">&#160;món</string>
-    <string name="text_dishes">&#160;món</string>
+    <string name="text_dialog_select_language">Select language</string>
+    <string name="text_total">Total:&#160;</string>
+    <string name="text_dish">&#160;dish</string>
+    <string name="text_dishes">&#160;dishes</string>
     <string name="text_response_error_msg">The server is not available</string>
     <string name="text_response_error_connection">The connection has a error</string>
-    <string name="text_response_error_not_process">The server can not `process this request</string>
-    <string name="text_not_available_network">Kết nối của bạn không khả dụng</string>
-    <string name="text_server_maintanance">Hệ thống đang bảo trì</string>
+    <string name="text_response_error_not_process">The server can process this request</string>
 </resources>

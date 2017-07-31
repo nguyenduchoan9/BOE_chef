@@ -50,4 +50,31 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
     </style>
+
+    <style name="LanguageButton">
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/tiny_space</item>
+        <item name="android:textSize">@dimen/size_medium_text</item>
+        <item name="android:background">@drawable/language_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
+
+    <style name="LoginButton">
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/tiny_space</item>
+        <item name="android:textSize">@dimen/size_medium_text</item>
+        <item name="android:background">@drawable/login_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
+
+    <style name="DoneButton">
+        <item name="android:gravity">center</item>
+        <item name="android:padding">@dimen/tiny_space</item>
+        <item name="android:textSize">@dimen/size_medium_text</item>
+        <item name="android:background">@drawable/done_button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
+    </style>
 </resources>

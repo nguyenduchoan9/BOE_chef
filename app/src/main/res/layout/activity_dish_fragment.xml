@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.example.bipain.boe_restaurantapp.fragment.DishFragment">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                tools:context="com.example.bipain.boe_restaurantapp.fragment.DishFragment">
 
-        <ListView
-            android:id="@+id/lvQueueDish"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:listSelector="@drawable/list_selector"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginRight="83dp"/>
-        <Button
-            android:id="@+id/btDone"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Done"
-            android:layout_alignParentRight="true"
-            android:textStyle="bold"
-            android:textColor="@color/holoRedLight"
-            android:layout_marginTop="0dp"/>
+    <ListView
+        android:id="@+id/lvQueueDish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="83dp"
+        android:listSelector="@drawable/list_selector"/>
 
-        <include layout="@layout/layout_processing"/>
+    <Button
+        android:id="@+id/btDone"
+        style="@style/DoneButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="0dp"
+        android:text="@string/text_btn_done"
+        android:textStyle="bold"/>
+
+    <include layout="@layout/layout_processing"/>
 </RelativeLayout>

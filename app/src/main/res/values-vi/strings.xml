@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">BOE_RestaurantApp</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_table_title">Bàn&#160;</string>
+
+    <string name="text_tab_dish">Món ăn</string>
+    <string name="text_tab_material">Nguyên liệu</string>
+    <string name="text_btn_done">Phục\nVụ</string>
+
+    <string name="text_bottom_navi_table">Bàn</string>
+    <string name="text_bottom_navi_attention">Chú ý</string>
+    <string name="text_bottom_navi_serving">Món ăn</string>
+
+    <string name="text_dialog_language_apply">Áp dụng</string>
+    <string name="text_dialog_language_close">Đóng</string>
+
+    <string name="text_toolbar_title_chef">Đầu bếp</string>
+    <string name="text_toolbar_title_waiter">Phục vụ</string>
+    <string name="text_menu_opt_language">Ngôn ngũ</string>
+
+    <string name="text_btn_login_as_chef">Đăng nhập như đầu bếp</string>
+    <string name="text_btn_login_as_waiter">Đăng nhập như phục vụ</string>
+
+    <string name="text_processing">Đang xủ lý...</string>
+    <string name="text_searching">Tìm kiếm...</string>
+    <string name="text_item_serve">Phục vụ</string>
+    <string name="text_dialog_select_language">Chọn ngôn ngữ</string>
+    <string name="text_total">Tổng số:&#160;</string>
+    <string name="text_dish">&#160;món</string>
+    <string name="text_dishes">&#160;món</string>
+    <string name="text_response_error_msg">The server is not available</string>
+    <string name="text_response_error_connection">The connection has a error</string>
+    <string name="text_response_error_not_process">The server can process this request</string>
+</resources>

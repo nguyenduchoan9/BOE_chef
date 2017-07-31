@@ -8,16 +8,21 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.fragment.LanguageDialog;
 import com.example.bipain.boe_restaurantapp.fragment.ServingFragment;
 import com.example.bipain.boe_restaurantapp.fragment.TableFragment;
 import com.example.bipain.boe_restaurantapp.fragment.WarningFragment;
@@ -26,7 +31,9 @@ import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
+import com.example.bipain.boe_restaurantapp.request.SessionDeleteResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.Constant;
 import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
@@ -71,12 +78,15 @@ public class WaiterActivity extends AppCompatActivity {
     @BindView(R.id.tvTable)
     TextView tvTable;
 
+    private Toolbar toolbar;
+
     ServingFragment servingFragment = new ServingFragment();
     WarningFragment warningFragment = new WarningFragment();
     TableFragment tableFragment = new TableFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Util.handleSelectLanguage(this, Util.getLanguage(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiter);
         ButterKnife.bind(this);
@@ -88,6 +98,13 @@ public class WaiterActivity extends AppCompatActivity {
         gson = new Gson();
         myScheduler = new SchedulerThread();
         setBroadcastReceiver();
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(R.string.text_toolbar_title_waiter);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         initView();
 
@@ -333,4 +350,62 @@ public class WaiterActivity extends AppCompatActivity {
         warningFragment.updateFromTable(listOD);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_waiter, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_language);
+        openSelectLanguageDialog(menuItem);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void openSelectLanguageDialog(MenuItem menuItem) {
+        menuItem.setOnMenuItemClickListener(item -> {
+            FragmentManager fm = getSupportFragmentManager();
+            LanguageDialog dialog = LanguageDialog.newInstance(preferencesManager.getLanguage());
+            dialog.setmListener(new LanguageDialog.LanguageListener() {
+                                    @Override
+                                    public void onEnglishSelect() {
+                                        preferencesManager.setLanguage(Constant.EN_LANGUAGE_STRING);
+                                        refreshViewAfterChangeLanguage();
+                                    }
+
+                                    @Override
+                                    public void onVNSelect() {
+                                        preferencesManager.setLanguage(Constant.VI_LANGUAGE_STRING);
+                                        refreshViewAfterChangeLanguage();
+                                    }
+                                }
+            );
+            dialog.show(fm, "putang");
+            return true;
+        });
+    }
+
+    private void refreshViewAfterChangeLanguage() {
+        finish();
+        startActivity(new Intent(this, WaiterActivity.class));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onLogOut();
+        return true;
+    }
+
+    private void onLogOut() {
+        services.logout(preferencesManager.getUser().getId()).enqueue(new Callback<SessionDeleteResponse>() {
+            @Override
+            public void onResponse(Call<SessionDeleteResponse> call, Response<SessionDeleteResponse> response) {
+                if (response.isSuccessful()) {
+                    preferencesManager.logOut();
+                    startActivity(LoginActivity.newInstance(WaiterActivity.this));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SessionDeleteResponse> call, Throwable t) {
+
+            }
+        });
+    }
 }

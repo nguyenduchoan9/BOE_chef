@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.bipain.boe_restaurantapp.R;
+import com.example.bipain.boe_restaurantapp.activities.SchedulerThread;
 import com.example.bipain.boe_restaurantapp.activities.WaiterActivity;
 import com.example.bipain.boe_restaurantapp.adapter.DishServeAdatper;
 import com.example.bipain.boe_restaurantapp.adapter.WarningAdapter;
@@ -25,6 +26,7 @@ import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.model.TableGroupServe;
 import com.example.bipain.boe_restaurantapp.model.WaiterNotification;
 import com.example.bipain.boe_restaurantapp.services.Services;
+import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,39 +73,60 @@ public class WarningFragment extends Fragment {
         mAdapter = new WarningAdapter();
         mAdapter.setListner((pos, notify) -> {
             showProcessing();
-            services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
-                @Override
-                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                    if (response.isSuccessful()) {
-                        if (null != response.body()) {
-//                            mAdapter.removeData(notify);
-                            updateServeOrigin(notify);
-                            setTotal();
-                        }
-                    }
-                    hideProcessing();
-                }
-
-                @Override
-                public void onFailure(Call<StatusResponse> call, Throwable t) {
-                    hideProcessing();
-                }
-            });
+            getMySchedulerThread().blockThread();
+            markOrderDetailServed(notify);
         });
         myHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
+                getMySchedulerThread().blockThread();
                 WaiterNotification i = (WaiterNotification) msg.obj;
                 if (i.isNotifyToWarning()) {
                     orginData.add(i);
                     groupDishByTable();
                 }
                 setTotal();
+                getMySchedulerThread().releaseThread();
 //                Log.d(LOG_TAG, i.getDish().getDishName()
 //                        + "-"
 //                        + String.valueOf(i.getDish().getDishId()));
             }
         };
+    }
+
+    private void markOrderDetailServed(ServingDishGroup notify) {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            updateServeOrigin(notify);
+                            setTotal();
+//                            getMySchedulerThread().addServedItem(notify);
+//                            mAdapter.removeData(notify);
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
+                    }
+                    hideProcessing();
+                    getMySchedulerThread().releaseThread();
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    hideProcessing();
+                    getMySchedulerThread().releaseThread();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+//            markOrderDetailServed(notify);
+        }
     }
 
     private String toServeParams(ServingDishGroup group) {
@@ -118,18 +141,21 @@ public class WarningFragment extends Fragment {
         return builder.deleteCharAt(builder.length() - 1).toString();
     }
 
+    private SchedulerThread getMySchedulerThread() {
+        return ((WaiterActivity) getActivity()).getMyScheduler();
+    }
+
     private void updateServeOrigin(ServingDishGroup group) {
-        List<WaiterNotification> updatedData = new ArrayList<>();
+        List<WaiterNotification> removeData = new ArrayList<>();
         boolean isChange = false;
         for (WaiterNotification noti : orginData) {
-            if (!group.isContainerOrderDetailId(noti.getOrderDetailId())) {
-                updatedData.add(noti);
+            if (group.isContainerOrderDetailId(noti.getOrderDetailId())) {
+                removeData.add(noti);
                 if (!isChange) isChange = true;
             }
         }
         if (isChange) {
-            orginData.clear();
-            orginData.addAll(updatedData);
+            orginData.removeAll(removeData);
             groupDishByTable();
         }
     }
@@ -165,7 +191,9 @@ public class WarningFragment extends Fragment {
 
     private void setTotal() {
         if (null != orginData) {
-            tvTotal.setText("Tổng số: " + String.valueOf(orginData.size()) + " dĩa");
+            tvTotal.setText(getString(R.string.text_total)
+                    + String.valueOf(orginData.size())
+                    + (orginData.size() <= 1 ? getString(R.string.text_dish) : getString(R.string.text_dishes)));
         }
     }
 
@@ -192,12 +220,14 @@ public class WarningFragment extends Fragment {
     }
 
     public void updateFromTable(List<TableGroupServe> listOD) {
+        getMySchedulerThread().blockThread();
         Log.d("Hoang", "updateFromTable: before " + orginData.size());
         if (removeInDerictFromTable(listOD)) {
             Log.d("Hoang", "updateFromTable: inside " + orginData.size());
             groupDishByTable();
         }
         setTotal();
+        getMySchedulerThread().releaseThread();
     }
 
     private boolean removeInDerictFromTable(List<TableGroupServe> listOD) {

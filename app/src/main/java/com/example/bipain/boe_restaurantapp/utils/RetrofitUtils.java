@@ -1,7 +1,16 @@
 package com.example.bipain.boe_restaurantapp.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
+import com.example.bipain.boe_restaurantapp.BuildConfig;
+import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.model.HeaderCredential;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -23,9 +32,10 @@ public class RetrofitUtils {
         this.preferencesManager = preferencesManager;
         this.endpointManager = endpointManager;
     }
+
     public Retrofit create() {
         return new Retrofit.Builder()
-                .baseUrl(endpointManager.getEndpoint() + "/api/")
+                .baseUrl(endpointManager.getEndpoint() + "api/")
                 .client(client())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -96,5 +106,43 @@ public class RetrofitUtils {
             }
             return chain.proceed(request);
         };
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    public static boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            int timeoutMs = 1500;
+            Socket sock = new Socket();
+            SocketAddress sockaddr = null;
+            sockaddr = new InetSocketAddress(BuildConfig.IP_BASE_URL, 3000);
+
+            sock.connect(sockaddr, timeoutMs);
+            sock.close();
+//            Process ipProcess = runtime.exec("/system/bin/ping -c 1 " + getHost(Constant.API_ENDPOINT));
+//            int exitValue = ipProcess.waitFor();
+//            return (exitValue == 0);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean checkNetworkAndServer(Context context) {
+        if (!isNetworkAvailable(context)) {
+            ToastUtils.toastLongMassage(context, context.getString(R.string.text_not_available_network));
+            return false;
+        } else if (!isOnline()) {
+            ToastUtils.toastLongMassage(context, context.getString(R.string.text_server_maintanance));
+            return false;
+        }
+        return true;
     }
 }

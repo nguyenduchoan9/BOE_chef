@@ -54,7 +54,7 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.TableViewHol
     @Override
     public void onBindViewHolder(TableViewHolder holder, int position) {
         TableModel model = getModelByPos(position);
-        holder.tvTable.setText("Table " + String.valueOf(model.getTableNumber()));
+        holder.tvTable.setText(mContext.getString(R.string.text_table_title) + String.valueOf(model.getTableNumber()));
         StringBuilder string = new StringBuilder();
 //        for (DishTableInfo d : model.getDishList()) {
 //            string.append(d.getDish().getName())

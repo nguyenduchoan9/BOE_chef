@@ -17,6 +17,7 @@ import com.example.bipain.boe_restaurantapp.utils.EndpointManager;
 import com.example.bipain.boe_restaurantapp.utils.PreferencesManager;
 import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
+import com.example.bipain.boe_restaurantapp.utils.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.gson.Gson;
@@ -43,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Util.handleSelectLanguage(this, Util.getLanguage(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
@@ -54,19 +56,15 @@ public class LoginActivity extends AppCompatActivity {
 
         if (checkGooglePlayService()) {
             btnChef.setOnClickListener(v -> {
-                loginAsChef();
-//                startActivity(TabManagerActivity.newInstance(LoginActivity.this));
+                if (RetrofitUtils.checkNetworkAndServer(LoginActivity.this)) {
+                    loginAsChef();
+                }
             });
 
             btnWaiter.setOnClickListener(v -> {
-                loginAsWaiter();
-
-//                startActivity(WaiterActivity.newInstance(LoginActivity.this));
-            });
-
-            Button btn = (Button) findViewById(R.id.btnth);
-            btn.setOnClickListener(v -> {
-                startActivity(new Intent(LoginActivity.this, ObserActivity.class));
+                if (RetrofitUtils.checkNetworkAndServer(LoginActivity.this)) {
+                    loginAsWaiter();
+                }
             });
         }
     }
@@ -84,8 +82,12 @@ public class LoginActivity extends AppCompatActivity {
                             saveCredentialHeader(response.headers());
                             saveUser(user);
                             startActivity(WaiterActivity.newInstance(LoginActivity.this));
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_not_process));
                         } else {
-                            ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_msg));
                         }
                     }
                     hideProcessing();
@@ -94,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
+                ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_connection));
             }
         });
     }
@@ -118,8 +120,12 @@ public class LoginActivity extends AppCompatActivity {
                             saveCredentialHeader(response.headers());
                             saveUser(user);
                             startActivity(TabManagerActivity.newInstance(LoginActivity.this));
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_not_process));
                         } else {
-                            ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_msg));
                         }
                     }
                     hideProcessing();
@@ -128,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                ToastUtils.toastLongMassage(LoginActivity.this, "The serve is under maintenance");
+                ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_connection));
             }
         });
     }

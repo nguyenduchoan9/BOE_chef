@@ -18,6 +18,7 @@ import com.example.bipain.boe_restaurantapp.model.Material;
 import com.example.bipain.boe_restaurantapp.model.StatusResponse;
 import com.example.bipain.boe_restaurantapp.services.Services;
 import com.example.bipain.boe_restaurantapp.utils.Constant;
+import com.example.bipain.boe_restaurantapp.utils.RetrofitUtils;
 import com.example.bipain.boe_restaurantapp.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,47 +74,69 @@ public class MaterialFragment extends Fragment {
     }
 
     private void markAvailable(int id) {
-        showProcessing();
-        Services services = getServices();
-        services.markMaterialAvailable(id).enqueue(new Callback<StatusResponse>() {
-            @Override
-            public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                if (response.isSuccessful()) {
-                    if (null != response.body()) {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            showProcessing();
+            Services services = getServices();
+            services.markMaterialAvailable(id).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
 
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
                     }
+                    hideProcessing();
                 }
-                hideProcessing();
-            }
 
-            @Override
-            public void onFailure(Call<StatusResponse> call, Throwable t) {
-                hideProcessing();
-            }
-        });
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    hideProcessing();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+//            markAvailable(id);
+        }
     }
 
     private void markNotAvailable(int id) {
-        showProcessing();
-        Services services = getServices();
-        services.markMaterialNotAvailable(id).enqueue(new Callback<List<Integer>>() {
-            @Override
-            public void onResponse(Call<List<Integer>> call, Response<List<Integer>> response) {
-                if (response.isSuccessful()) {
-                    if (null != response.body()) {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            showProcessing();
+            Services services = getServices();
+            services.markMaterialNotAvailable(id).enqueue(new Callback<List<Integer>>() {
+                @Override
+                public void onResponse(Call<List<Integer>> call, Response<List<Integer>> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
 //                        ToastUtils.toastShortMassage(getContext(), "not available");
 
-                        notifyDishServing(response.body());
+                            notifyDishServing(response.body());
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
                     }
+                    hideProcessing();
                 }
-                hideProcessing();
-            }
 
-            @Override
-            public void onFailure(Call<List<Integer>> call, Throwable t) {
-                hideProcessing();
-            }
-        });
+                @Override
+                public void onFailure(Call<List<Integer>> call, Throwable t) {
+                    hideProcessing();
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+            markNotAvailable(id);
+        }
     }
 
     @Override
@@ -121,22 +144,37 @@ public class MaterialFragment extends Fragment {
         super.onStart();
         Log.d(Constant.LOG_TAG, "Menu-onstart");
         setPos();
-        Services service = getServices();
-        service.getMaterial().enqueue(new Callback<List<Material>>() {
-            @Override
-            public void onResponse(Call<List<Material>> call, Response<List<Material>> response) {
-                if (response.isSuccessful()) {
-                    if (null != response.body()) {
-                        materialAdapter.setData(response.body());
+        getMaterial();
+    }
+
+    private void getMaterial() {
+        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+            Services service = getServices();
+            service.getMaterial().enqueue(new Callback<List<Material>>() {
+                @Override
+                public void onResponse(Call<List<Material>> call, Response<List<Material>> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            materialAdapter.setData(response.body());
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<List<Material>> call, Throwable t) {
+                @Override
+                public void onFailure(Call<List<Material>> call, Throwable t) {
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        } else {
+//            getMaterial();
+        }
 
-            }
-        });
     }
 
     @Override

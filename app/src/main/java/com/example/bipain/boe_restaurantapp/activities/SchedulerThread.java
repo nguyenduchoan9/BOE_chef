@@ -20,6 +20,15 @@ public class SchedulerThread implements Runnable {
     private LinkedList<TableGroupServe> dishTableServed = new LinkedList<>();
     private Handler myHandler;
     private Handler handleLongTime;
+    private boolean isCallingApi = false;
+
+    public void blockThread() {
+        isCallingApi = true;
+    }
+
+    public void releaseThread() {
+        isCallingApi = false;
+    }
 
     public void setHandleLongTime(Handler handleLongTime) {
         this.handleLongTime = handleLongTime;
@@ -55,84 +64,86 @@ public class SchedulerThread implements Runnable {
     public void run() {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 //        while (flagStop) {
-        if (null != itemTiming) {
-            if (itemServed.size() > 0) {
-                LinkedList<WaiterNotification> found = new LinkedList<>();
-                for (WaiterNotification served : itemServed) {
+        if (!isCallingApi) {
+            if (null != itemTiming) {
+                if (itemServed.size() > 0) {
+                    LinkedList<WaiterNotification> found = new LinkedList<>();
+                    for (WaiterNotification served : itemServed) {
 //                    int pos = -1;
-                    for (int i = 0; i < itemTiming.size(); i++) {
-                        WaiterNotification current = itemTiming.get(i);
-                        if (served.getOrderDetailId() == current.getOrderDetailId()
-                                && served.getUid() == current.getUid()) {
+                        for (int i = 0; i < itemTiming.size(); i++) {
+                            WaiterNotification current = itemTiming.get(i);
+                            if (served.getOrderDetailId() == current.getOrderDetailId()
+                                    && served.getUid() == current.getUid()) {
 //                            pos = i;
-                            if (-1 == found.indexOf(current))
-                                found.add(current);
+                                if (-1 == found.indexOf(current))
+                                    found.add(current);
 //                            break;
+                            }
                         }
-                    }
 //                    if (-1 != pos) {
 //                        itemTiming.remove(pos);
 //                    }
-                }
-                if (found.size() > 0) itemTiming.removeAll(found);
-                itemServed.clear();
-            }
-            if (dishTableServed.size() > 0) {
-                for (int x = 0; x < dishTableServed.size(); x++) {
-                    int dishServedOD = dishTableServed.get(x).orderDetailId;
-//                    int pos = -1;
-                    LinkedList<WaiterNotification> found = new LinkedList<>();
-//                    for (int abc = 0; abc < ; abc++) {
-                    for (int i = 0; i < itemTiming.size(); i++) {
-                        WaiterNotification current = itemTiming.get(i);
-                        if (dishServedOD == current.getOrderDetailId()) {
-//                                pos = i;
-                            if (-1 == found.indexOf(current)) {
-                                found.add(current);
-                                if (dishTableServed.get(x).quantityCountInThread == found.size())
-                                    break;
-                            }
-                        }
                     }
-//                    }
                     if (found.size() > 0) itemTiming.removeAll(found);
+                    itemServed.clear();
                 }
-                dishTableServed.clear();
-            }
-            if (itemTiming.size() > 0) {
-                LinkedList<WaiterNotification> newList = new LinkedList<>();
-                for (WaiterNotification timing : itemTiming) {
-                    newList.add(timing);
-                    if (timing.isTooLong()) {
-                        if (null != handleLongTime) {
-                            Message msg = new Message();
-                            Message msg2 = new Message();
-                            timing.setNotifyToWarning();
-                            msg.obj = timing;
-                            msg2.obj = timing;
-                            if (!isInItemServe(timing)) {
-                                handleLongTime.sendMessage(msg2);
-                                myHandler.sendMessage(msg);
+                if (dishTableServed.size() > 0) {
+                    for (int x = 0; x < dishTableServed.size(); x++) {
+                        int dishServedOD = dishTableServed.get(x).orderDetailId;
+//                    int pos = -1;
+                        LinkedList<WaiterNotification> found = new LinkedList<>();
+//                    for (int abc = 0; abc < ; abc++) {
+                        for (int i = 0; i < itemTiming.size(); i++) {
+                            WaiterNotification current = itemTiming.get(i);
+                            if (dishServedOD == current.getOrderDetailId()) {
+//                                pos = i;
+                                if (-1 == found.indexOf(current)) {
+                                    found.add(current);
+                                    if (dishTableServed.get(x).quantityCountInThread == found.size())
+                                        break;
+                                }
                             }
                         }
-                        newList.remove(newList.size() - 1);
-                    } else if (timing.isWaitShort() && !timing.isNotifyToShort()) {
-                        if (null != myHandler) {
-                            Message msg = new Message();
-                            timing.setNotifiedShort();
-                            msg.obj = timing;
-                            if (!isInItemServe(timing)) {
-                                myHandler.sendMessage(msg);
+//                    }
+                        if (found.size() > 0) itemTiming.removeAll(found);
+                    }
+                    dishTableServed.clear();
+                }
+                if (itemTiming.size() > 0) {
+                    LinkedList<WaiterNotification> newList = new LinkedList<>();
+                    for (WaiterNotification timing : itemTiming) {
+                        newList.add(timing);
+                        if (timing.isTooLong()) {
+                            if (null != handleLongTime) {
+                                Message msg = new Message();
+                                Message msg2 = new Message();
+                                timing.setNotifyToWarning();
+                                msg.obj = timing;
+                                msg2.obj = timing;
+                                if (!isInItemServe(timing)) {
+                                    handleLongTime.sendMessage(msg2);
+                                    myHandler.sendMessage(msg);
+                                }
+                            }
+                            newList.remove(newList.size() - 1);
+                        } else if (timing.isWaitShort() && !timing.isNotifyToShort()) {
+                            if (null != myHandler) {
+                                Message msg = new Message();
+                                timing.setNotifiedShort();
+                                msg.obj = timing;
+                                if (!isInItemServe(timing)) {
+                                    myHandler.sendMessage(msg);
+                                }
                             }
                         }
                     }
+                    itemTiming.clear();
+                    itemTiming.addAll(newList);
                 }
-                itemTiming.clear();
-                itemTiming.addAll(newList);
-            }
-            if (itemTimingPlus.size() > 0) {
-                itemTiming.addAll(itemTimingPlus);
-                itemTimingPlus = new LinkedList<>();
+                if (itemTimingPlus.size() > 0) {
+                    itemTiming.addAll(itemTimingPlus);
+                    itemTimingPlus = new LinkedList<>();
+                }
             }
         }
         myHandler.postDelayed(this, 200);

@@ -1,7 +1,10 @@
 package com.example.bipain.boe_restaurantapp.utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -17,6 +20,7 @@ import android.view.WindowManager;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.model.GroupDishByTable;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by hoang on 24/06/2017.
@@ -124,4 +128,23 @@ public class Util {
         wm.getDefaultDisplay().getMetrics(displaymetrics);
         return displaymetrics;
     }
+
+    public static String getLanguage(Context context){
+        SharedPreferences sharedPreferences = context.getSharedPreferences("BOE", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("LANGUAGE_INFO", Constant.VI_LANGUAGE_STRING);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void handleSelectLanguage(Activity activity, String lang) {
+        String languageToLoad = lang; // your language
+        Locale locale = new Locale(languageToLoad);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
+        config.setLocale(locale);
+//        Context context  = createConfigurationContext(config);
+//        Resources resources = context.getResources();
+        activity.getBaseContext().getResources().updateConfiguration(config,
+                activity.getBaseContext().getResources().getDisplayMetrics());
+    }
 }
+

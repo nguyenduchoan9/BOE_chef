@@ -1,8 +1,10 @@
 package com.example.bipain.boe_restaurantapp.adapter;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.fragment.DishFragment;
 import com.example.bipain.boe_restaurantapp.fragment.MaterialFragment;
 import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
@@ -13,13 +15,15 @@ import java.util.ArrayList;
  */
 
 public class PagerFragmentAdapter extends FragmentPagerAdapter {
-    String[] title = {"dish", "material"};
+    int[] title = {R.string.text_tab_dish, R.string.text_tab_material};
+    private Context mContext;
 
-    public PagerFragmentAdapter(FragmentManager fm) {
+    public PagerFragmentAdapter(FragmentManager fm, Context context) {
         super(fm);
         fragments = new ArrayList<>();
         fragments.add(new DishFragment());
         fragments.add(new MaterialFragment());
+        this.mContext = context;
     }
 
     ArrayList<Fragment> fragments;
@@ -41,7 +45,7 @@ public class PagerFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return title[position].toUpperCase();
+        return mContext.getString(title[position]).toUpperCase();
     }
 
     @Override
