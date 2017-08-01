@@ -121,6 +121,7 @@ public class TableFragment extends Fragment {
                 }
             });
         } else {
+            hideProcessing();
 //            markListOrderDetailServed(pos, orderDetailIdList, tableModel);
         }
 
@@ -137,9 +138,9 @@ public class TableFragment extends Fragment {
     }
 
     private void loadData() {
+        showProcessing();
         if (RetrofitUtils.checkNetworkAndServer(getContext())) {
             Services services = getServices();
-            showProcessing();
             services.getTable().enqueue(new Callback<List<TableModel>>() {
                 @Override
                 public void onResponse(Call<List<TableModel>> call, Response<List<TableModel>> response) {
@@ -164,6 +165,7 @@ public class TableFragment extends Fragment {
                 }
             });
         } else {
+            hideProcessing();
 //            loadData();
         }
 

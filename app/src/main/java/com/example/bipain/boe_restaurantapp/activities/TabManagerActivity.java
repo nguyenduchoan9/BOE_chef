@@ -139,7 +139,7 @@ public class TabManagerActivity extends AppCompatActivity {
     }
 
     private void onLogOut() {
-        if (RetrofitUtils.checkNetworkAndServer(TabManagerActivity.this)) {
+        if (RetrofitUtils.checkNetworkAndToast(TabManagerActivity.this)) {
             services.logout(preferencesManager.getUser().getId()).enqueue(new Callback<SessionDeleteResponse>() {
                 @Override
                 public void onResponse(Call<SessionDeleteResponse> call, Response<SessionDeleteResponse> response) {

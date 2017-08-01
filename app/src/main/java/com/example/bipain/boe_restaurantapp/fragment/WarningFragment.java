@@ -125,6 +125,7 @@ public class WarningFragment extends Fragment {
                 }
             });
         } else {
+            hideProcessing();
 //            markOrderDetailServed(notify);
         }
     }

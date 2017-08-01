@@ -74,8 +74,8 @@ public class MaterialFragment extends Fragment {
     }
 
     private void markAvailable(int id) {
+        showProcessing();
         if (RetrofitUtils.checkNetworkAndServer(getContext())) {
-            showProcessing();
             Services services = getServices();
             services.markMaterialAvailable(id).enqueue(new Callback<StatusResponse>() {
                 @Override
@@ -101,13 +101,14 @@ public class MaterialFragment extends Fragment {
                 }
             });
         } else {
+            hideProcessing();
 //            markAvailable(id);
         }
     }
 
     private void markNotAvailable(int id) {
+        showProcessing();
         if (RetrofitUtils.checkNetworkAndServer(getContext())) {
-            showProcessing();
             Services services = getServices();
             services.markMaterialNotAvailable(id).enqueue(new Callback<List<Integer>>() {
                 @Override
@@ -135,7 +136,8 @@ public class MaterialFragment extends Fragment {
                 }
             });
         } else {
-            markNotAvailable(id);
+            hideProcessing();
+//            markNotAvailable(id);
         }
     }
 
@@ -148,7 +150,7 @@ public class MaterialFragment extends Fragment {
     }
 
     private void getMaterial() {
-        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+        if (RetrofitUtils.checkNetworkAndToast(getContext())) {
             Services service = getServices();
             service.getMaterial().enqueue(new Callback<List<Material>>() {
                 @Override

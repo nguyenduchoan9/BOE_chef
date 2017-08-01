@@ -77,7 +77,7 @@ public class ServingFragment extends Fragment {
         mAdapter.setListner((pos, notify) -> {
             getMySchedulerThread().blockThread();
             Log.d("Hoang", "onCreate: " + pos);
-            showProcessing();
+
             markOrderDetailServed(notify);
         });
         myHandler = new Handler() {
@@ -106,6 +106,7 @@ public class ServingFragment extends Fragment {
     }
 
     private void markOrderDetailServed(ServingDishGroup notify) {
+        showProcessing();
         if (RetrofitUtils.checkNetworkAndServer(getContext())) {
             services.markOrderDetailServed(toServeParams(notify)).enqueue(new Callback<StatusResponse>() {
                 @Override
@@ -136,6 +137,7 @@ public class ServingFragment extends Fragment {
                 }
             });
         } else {
+            hideProcessing();
 //            markOrderDetailServed(notify);
         }
     }

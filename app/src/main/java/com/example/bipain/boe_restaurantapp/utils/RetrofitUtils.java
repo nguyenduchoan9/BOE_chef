@@ -3,6 +3,7 @@ package com.example.bipain.boe_restaurantapp.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.StrictMode;
 import android.util.Log;
 import com.example.bipain.boe_restaurantapp.BuildConfig;
 import com.example.bipain.boe_restaurantapp.R;
@@ -117,6 +118,8 @@ public class RetrofitUtils {
 
     public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         try {
             int timeoutMs = 1500;
             Socket sock = new Socket();
@@ -139,8 +142,17 @@ public class RetrofitUtils {
         if (!isNetworkAvailable(context)) {
             ToastUtils.toastLongMassage(context, context.getString(R.string.text_not_available_network));
             return false;
-        } else if (!isOnline()) {
-            ToastUtils.toastLongMassage(context, context.getString(R.string.text_server_maintanance));
+        }
+        return true;
+//         else if (!isOnline()) {
+//            ToastUtils.toastLongMassage(context, context.getString(R.string.text_server_maintanance));
+//            return false;
+//        }
+    }
+
+    public static boolean checkNetworkAndToast(Context context) {
+        if (!isNetworkAvailable(context)) {
+            ToastUtils.toastLongMassage(context, context.getString(R.string.text_not_available_network));
             return false;
         }
         return true;

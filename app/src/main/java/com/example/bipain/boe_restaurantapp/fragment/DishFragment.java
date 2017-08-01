@@ -85,8 +85,8 @@ public class DishFragment extends Fragment {
 
         btDone.setOnClickListener(v -> {
             if (listCompletedDish.toString().trim().length() > 0) {
-                if (RetrofitUtils.checkNetworkAndServer(getContext())) {
-                    showProcessing();
+                showProcessing();
+                if (RetrofitUtils.checkNetworkAndToast(getContext())) {
                     Services services = getService();
                     String listDishParam = listCompletedDish.deleteCharAt(listCompletedDish.length() - 1).toString();
                     listDishParam = listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
@@ -122,6 +122,7 @@ public class DishFragment extends Fragment {
                                 }
                             });
                 }else {
+                    hideProcessing();
 //                    btDone.performClick();
                 }
             }
@@ -324,7 +325,7 @@ public class DishFragment extends Fragment {
     }
 
     private void notifyUpdateDishInChefComplete(List<Integer> list) {
-        if (RetrofitUtils.checkNetworkAndServer(getContext())) {
+        if (RetrofitUtils.checkNetworkAndToast(getContext())) {
             StringBuilder params = new StringBuilder();
             for (Integer id : list) {
                 params.append(String.valueOf(id))
