@@ -335,6 +335,7 @@ public class DishFragment extends Fragment {
                     for (DishInQueue dish : queueDish) {
                         if (dish.getDish().getDishId() == dishInOrder.getDish().getDishId()) {
                             quantity += 1;
+                            dishInOrder.addDescription(dish.getDescription());
                         }
                     }
                     Log.d("Hoang", "setDishInOrders: " + quantity + " - " + String.valueOf(dishInOrder.isChecked()));

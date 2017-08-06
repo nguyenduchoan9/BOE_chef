@@ -76,6 +76,7 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         viewlHolder.chkDone.setVisibility(View.GONE);
         viewlHolder.handleOverMaterial.setVisibility(View.GONE);
         viewlHolder.rlBg.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white));
+        viewlHolder.tvDes.setVisibility(View.GONE);
 
         if (!dish.isOverMaterial()) {
             viewlHolder.chkDone.setVisibility(View.VISIBLE);
@@ -110,7 +111,10 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
                 }
             });
         }
-
+        if (dish.getDescription().get(0).length() > 0) {
+            viewlHolder.tvDes.setText("* " + dish.getDescription().get(0));
+            viewlHolder.tvDes.setVisibility(View.VISIBLE);
+        }
         viewlHolder.txtDishName.setText(dish.getDish().getName());
         viewlHolder.txtQuantity.setText("x" + String.valueOf(dish.getQuantity()));
         viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
@@ -125,6 +129,7 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         public CheckBox chkDone;
         public LinearLayout handleOverMaterial;
         public RelativeLayout rlBg;
+        public TextView tvDes;
 
         public ViewHolder(View v) {
             initView(v);
@@ -139,8 +144,8 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             tvKeep = (TextView) view.findViewById(R.id.tvKeep);
             tvCancel = (TextView) view.findViewById(R.id.tvCancel);
             rlBg = (RelativeLayout) view.findViewById(R.id.rlBg);
+            tvDes = (TextView) view.findViewById(R.id.tvDes);
         }
-
 
     }
 
