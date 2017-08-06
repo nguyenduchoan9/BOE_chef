@@ -19,6 +19,7 @@ import android.util.TypedValue;
 import android.view.WindowManager;
 import com.example.bipain.boe_restaurantapp.R;
 import com.example.bipain.boe_restaurantapp.model.GroupDishByTable;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
@@ -145,6 +146,13 @@ public class Util {
 //        Resources resources = context.getResources();
         activity.getBaseContext().getResources().updateConfiguration(config,
                 activity.getBaseContext().getResources().getDisplayMetrics());
+    }
+
+    public static String formatVNDecimal(float money) {
+        Locale local = new Locale("vi","VN");
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(local);
+//        DecimalFormat decimalFormat = new DecimalFormat("###.###.###");
+        return currencyFormat.format(money);
     }
 }
 

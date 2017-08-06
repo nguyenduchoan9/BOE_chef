@@ -2,6 +2,7 @@ package com.example.bipain.boe_restaurantapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.Normalizer;
@@ -68,42 +71,60 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
         }
 
         DishInOrder dish = data.get(position);
+        // refresh viewholder
+        viewlHolder.chkDone.setOnCheckedChangeListener(null);
+        viewlHolder.chkDone.setVisibility(View.GONE);
+        viewlHolder.handleOverMaterial.setVisibility(View.GONE);
+        viewlHolder.rlBg.setBackgroundColor(ContextCompat.getColor(activity, android.R.color.white));
+
+        if (!dish.isOverMaterial()) {
+            viewlHolder.chkDone.setVisibility(View.VISIBLE);
+            viewlHolder.chkDone.setChecked(dish.isChecked());
+            viewlHolder.chkDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                dish.setChecked(isChecked);
+                if (isChecked) {
+                    Log.d("Hoang", "getView: true");
+                    listener.onDoneClick(dish.getDish().getDishId(), dish.getIdentity());
+                } else {
+                    Log.d("Hoang", "getView: false");
+                    listener.onNotDoneClick(dish.getDish().getDishId(), dish.getIdentity());
+                }
+            });
+            convertView.setOnLongClickListener(v -> {
+                if (null != listener) {
+                    listener.onLongClick(dish.getDish().getDishId());
+                }
+                return true;
+            });
+        } else {
+            viewlHolder.rlBg.setBackgroundColor(ContextCompat.getColor(activity, R.color.colorWarningBlue));
+            viewlHolder.handleOverMaterial.setVisibility(View.VISIBLE);
+            viewlHolder.tvKeep.setOnClickListener(v -> {
+                if (null != listener) {
+                    listener.onKeepDishClick(dish.getDish().getDishId());
+                }
+            });
+            viewlHolder.tvCancel.setOnClickListener(v -> {
+                if (null != listener) {
+                    listener.onCancelClick(dish.getDish().getDishId());
+                }
+            });
+        }
 
         viewlHolder.txtDishName.setText(dish.getDish().getName());
-        viewlHolder.txtQuantity.setText(String.valueOf(dish.getQuantity()));
+        viewlHolder.txtQuantity.setText("x" + String.valueOf(dish.getQuantity()));
         viewlHolder.txtDishId.setText(String.valueOf(dish.getDish().getDishId()));
-        viewlHolder.chkDone.setOnCheckedChangeListener(null);
-        viewlHolder.chkDone.setChecked(dish.isChecked());
-        viewlHolder.chkDone.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            dish.setChecked(isChecked);
-            if (isChecked) {
-                Log.d("Hoang", "getView: true");
-                listener.onDoneClick(dish.getDish().getDishId(), dish.getIdentity());
-            } else {
-                Log.d("Hoang", "getView: false");
-                listener.onNotDoneClick(dish.getDish().getDishId(), dish.getIdentity());
-            }
-        });
-        ViewHolder finalViewlHolder = viewlHolder;
-//        viewlHolder.chkDone.setOnClickListener(v -> {
-//            boolean isChecked = finalViewlHolder.chkDone.isChecked();
-//            dish.setChecked(isChecked);
-//            if (isChecked) {
-//                Log.d("Hoang", "getView: true");
-//                listener.onDoneClick(finalDish.getDish().getDishId(), finalDish.getIdentity());
-//            } else {
-//                Log.d("Hoang", "getView: false");
-//                listener.onNotDoneClick(finalDish.getDish().getDishId(), finalDish.getIdentity());
-//            }
-//        });
+
         return convertView;
     }
 
     class ViewHolder {
         public TextView txtDishName;
         public TextView txtQuantity;
-        public TextView txtDishId;
+        public TextView txtDishId, tvKeep, tvCancel;
         public CheckBox chkDone;
+        public LinearLayout handleOverMaterial;
+        public RelativeLayout rlBg;
 
         public ViewHolder(View v) {
             initView(v);
@@ -114,13 +135,25 @@ public class DishQueueAdapter extends BaseAdapter implements Filterable {
             txtQuantity = (TextView) view.findViewById(R.id.txtQuantity);
             txtDishId = (TextView) view.findViewById(R.id.txtDishId);
             chkDone = (CheckBox) view.findViewById(R.id.chkCookedDish);
+            handleOverMaterial = (LinearLayout) view.findViewById(R.id.handleOverMaterial);
+            tvKeep = (TextView) view.findViewById(R.id.tvKeep);
+            tvCancel = (TextView) view.findViewById(R.id.tvCancel);
+            rlBg = (RelativeLayout) view.findViewById(R.id.rlBg);
         }
+
+
     }
 
     public interface DishQueueAdapterListener {
         void onDoneClick(int dishId, Date identify);
 
         void onNotDoneClick(int dishId, Date identify);
+
+        void onLongClick(int dishId);
+
+        void onKeepDishClick(int dishId);
+
+        void onCancelClick(int dishId);
     }
 
     private DishQueueAdapterListener listener;

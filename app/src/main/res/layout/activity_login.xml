@@ -28,6 +28,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/text_btn_login_as_waiter"/>
+
+        <Button
+            android:layout_marginTop="16dp"
+            android:id="@+id/btnCashier"
+            style="@style/WaiterLoginButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/text_login_as_cashier"/>
     </LinearLayout>
     <include layout="@layout/layout_processing"/>
 </RelativeLayout>

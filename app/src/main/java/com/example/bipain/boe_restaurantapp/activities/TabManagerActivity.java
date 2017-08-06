@@ -27,6 +27,7 @@ import com.example.bipain.boe_restaurantapp.fragment.LanguageDialog;
 import com.example.bipain.boe_restaurantapp.fragment.OrderFragment;
 import com.example.bipain.boe_restaurantapp.gcm.GCMIntentService;
 import com.example.bipain.boe_restaurantapp.gcm.GCMRegistrationIntentService;
+import com.example.bipain.boe_restaurantapp.model.CancelDish;
 import com.example.bipain.boe_restaurantapp.model.Dish;
 import com.example.bipain.boe_restaurantapp.model.User;
 import com.example.bipain.boe_restaurantapp.request.NotificationResponse;
@@ -358,6 +359,13 @@ public class TabManagerActivity extends AppCompatActivity {
                         DishFragment fragment = (DishFragment) adapter.getItem(0);
                         fragment.addNewQueue(queue);
                     }
+                } else if (intent.getAction().endsWith(GCMIntentService.MESSAGE_TO_CHEF_CANCEL_DISH)) {
+                    String body = intent.getStringExtra("body");
+                    CancelDish ids = gson.fromJson(body, CancelDish.class);
+                    if (null != adapter) {
+                        DishFragment fragment = (DishFragment) adapter.getItem(0);
+                        fragment.cancelDish(ids.getIds());
+                    }
                 } else {
                     ToastUtils.toastShortMassage(getApplicationContext(), "Nothing");
                 }
@@ -379,6 +387,8 @@ public class TabManagerActivity extends AppCompatActivity {
                 new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_DISH));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_ORDER));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver,
+                new IntentFilter(GCMIntentService.MESSAGE_TO_CHEF_CANCEL_DISH));
         tabLayout.getTabAt(0).select();
         fragmentPos = 0;
     }

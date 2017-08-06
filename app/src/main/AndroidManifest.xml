@@ -73,6 +73,8 @@
             android:screenOrientation="landscape"/>
         <activity android:name=".activities.ObserActivity">
         </activity>
+        <activity android:name=".activities.CashierActivity">
+        </activity>
     </application>
 
 </manifest>

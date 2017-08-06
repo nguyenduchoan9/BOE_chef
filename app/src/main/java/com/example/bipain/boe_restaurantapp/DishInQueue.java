@@ -14,6 +14,7 @@ public class DishInQueue {
     private Dish dish;
     @SerializedName("order_id")
     private int orderId;
+    private boolean overMaterial = false;
 
     public DishInQueue(Dish dish, int orderId) {
         this.dish = dish;
@@ -57,5 +58,13 @@ public class DishInQueue {
 
     public void setOrderId(int orderId) {
         this.orderId = orderId;
+    }
+
+    public boolean isOverMaterial() {
+        return overMaterial;
+    }
+
+    public void setOverMaterial(boolean overMaterial) {
+        this.overMaterial = overMaterial;
     }
 }

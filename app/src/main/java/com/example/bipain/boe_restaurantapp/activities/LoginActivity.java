@@ -35,6 +35,8 @@ public class LoginActivity extends AppCompatActivity {
     Button btnChef;
     @BindView(R.id.btnWaiter)
     Button btnWaiter;
+    @BindView(R.id.btnCashier)
+    Button btnCashier;
     private PreferencesManager preferencesManager;
     private EndpointManager endpointManager;
     private Retrofit apiService;
@@ -66,7 +68,43 @@ public class LoginActivity extends AppCompatActivity {
                     loginAsWaiter();
                 }
             });
+            btnCashier.setOnClickListener(v -> {
+                loginAsCashier();
+            });
         }
+    }
+
+    private void loginAsCashier() {
+        showProcessing();
+        LoginUserParam userParam = new LoginUserParam("mastercashier", "12345678");
+        services.loginAsChef(userParam).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    if (null != response.body()) {
+                        User user = response.body();
+                        if ("cashier".equals(user.getRole())) {
+                            saveCredentialHeader(response.headers());
+                            saveUser(user);
+                            startActivity(CashierActivity.newInstance(LoginActivity.this));
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_msg));
+                        }
+                    }
+                    hideProcessing();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_connection));
+                hideProcessing();
+            }
+        });
     }
 
     private void loginAsWaiter() {
@@ -97,6 +135,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_connection));
+                hideProcessing();
             }
         });
     }
@@ -134,6 +173,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
+                hideProcessing();
                 ToastUtils.toastLongMassage(LoginActivity.this, getString(R.string.text_response_error_connection));
             }
         });

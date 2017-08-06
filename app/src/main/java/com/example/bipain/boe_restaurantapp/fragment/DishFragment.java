@@ -34,12 +34,13 @@ public class DishFragment extends Fragment {
 
     private ListView lvDishInQueue;
     private DishQueueAdapter dishQueueAdapter;
-    private LinkedList<DishInQueue> queueDish;
+    private LinkedList<DishInQueue> queueDish = new LinkedList<>();
     private ArrayList<DishInOrder> dishInOrders;
     private Button btDone;
     private RelativeLayout rlProcessing;
 
     StringBuilder listCompletedDish = new StringBuilder("");
+    StringBuilder listCompletedDishLong = new StringBuilder("");
 
     View view;
 
@@ -58,74 +59,51 @@ public class DishFragment extends Fragment {
         view = inflater.inflate(R.layout.activity_dish_fragment, container, false);
         lvDishInQueue = (ListView) view.findViewById(R.id.lvQueueDish);
         lvDishInQueue.setAdapter(dishQueueAdapter);
-
-//        lvDishInQueue.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view1, int position, long id) {
-//                DishInOrder dish = (DishInOrder) lvDishInQueue.getItemAtPosition(position);
-////            CheckBox chkCheck = (CheckBox) view1.findViewById(R.id.chkCookedDish);
-//                CheckBox chkCheck = null;
-//                boolean ischecked = chkCheck.isChecked();
-//                if (!ischecked) {
-//                    chkCheck.setChecked(true);
-//                    listCompletedDish += DishFragment.this.getOrderIdByDish(dish.getDish().getDishId()) + "-" + dish.getDish().getDishId() + ";";
-//                } else {
-//                    chkCheck.setChecked(false);
-//                    String[] listDish = listCompletedDish.split(";");
-//                    listCompletedDish = "";
-//                    for (String cookedDish : listDish) {
-//                        if (!cookedDish.contains("-" + dish.getDish().getDishId())) {
-//                            listCompletedDish += cookedDish + ";";
-//                        }
-//                    }
-//                }
-//            }
-//        });
         btDone = (Button) view.findViewById(R.id.btDone);
 
         btDone.setOnClickListener(v -> {
             if (listCompletedDish.toString().trim().length() > 0) {
                 showProcessing();
-                if (RetrofitUtils.checkNetworkAndToast(getContext())) {
-                    Services services = getService();
-                    String listDishParam = listCompletedDish.deleteCharAt(listCompletedDish.length() - 1).toString();
-                    listDishParam = listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
-                    listCompletedDish = new StringBuilder(listDishParam);
-                    services.markListDishDone(listDishParam)
-                            .enqueue(new Callback<StatusResponse>() {
-                                @Override
-                                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                                    if (response.isSuccessful()) {
-                                        if (null != response.body()) {
-                                            String[] listDish = listCompletedDish.toString().split(";");
-                                            for (String cookedDish : listDish) {
-                                                String[] id = cookedDish.split("_");
-                                                int dishId = Integer.parseInt(id[1]);
-                                                removeDishIsCooked(dishId);
-                                            }
-                                            listCompletedDish = new StringBuilder("");
+//                if (RetrofitUtils.checkNetworkAndToast(getContext())) {
+                Services services = getService();
+                String listDishParam = listCompletedDish.deleteCharAt(listCompletedDish.length() - 1).toString();
+                listDishParam = listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
+                listCompletedDish = new StringBuilder(listDishParam);
+                services.markListDishDone(listDishParam)
+                        .enqueue(new Callback<StatusResponse>() {
+                            @Override
+                            public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                                if (response.isSuccessful()) {
+                                    if (null != response.body()) {
+                                        String[] listDish = listCompletedDish.toString().split(";");
+                                        for (String cookedDish : listDish) {
+                                            String[] id = cookedDish.split("_");
+                                            int dishId = Integer.parseInt(id[1]);
+                                            removeDishIsCooked(dishId);
                                         }
-                                    }else {
-                                        if (response.code() == 500) {
-                                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
-                                        } else {
-                                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
-                                        }
+                                        listCompletedDish = new StringBuilder("");
                                     }
-                                    hideProcessing();
+                                } else {
+                                    if (response.code() == 500) {
+                                        ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                                    } else {
+                                        ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                                    }
                                 }
+                                hideProcessing();
+                            }
 
-                                @Override
-                                public void onFailure(Call<StatusResponse> call, Throwable t) {
-                                    hideProcessing();
-                                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
-                                }
-                            });
-                }else {
-                    hideProcessing();
+                            @Override
+                            public void onFailure(Call<StatusResponse> call, Throwable t) {
+                                hideProcessing();
+                                ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                            }
+                        });
+            } else {
+                hideProcessing();
 //                    btDone.performClick();
-                }
             }
+//            }
 
         });
         rlProcessing = (RelativeLayout) view.findViewById(R.id.rlProcessing);
@@ -164,26 +142,167 @@ public class DishFragment extends Fragment {
                 }
                 updateCheckInQueueDish(identity, false);
             }
+
+            @Override
+            public void onLongClick(int dishId) {
+                handleServeAllDish(dishId);
+            }
+
+            @Override
+            public void onKeepDishClick(int dishId) {
+                doKeepOrderDetail(dishId);
+            }
+
+            @Override
+            public void onCancelClick(int dishId) {
+                doCancelOrderDetail(dishId);
+            }
         });
-//        dishQueueAdapter.setListener(dishId -> {
-//            Services services = getService();
-//            int orderId = getOrderIdByDish(dishId);
-//            services.markDishDone(orderId, dishId).enqueue(new Callback<StatusResponse>() {
-//                @Override
-//                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-//                    if (response.isSuccessful()) {
-//                        if (null != response.body()) {
-//                            removeDishIsCooked(dishId);
-//                        }
+    }
+
+    private void doKeepOrderDetail(int dishId) {
+        if (RetrofitUtils.checkNetworkAndToast(getContext())) {
+            StringBuilder params = new StringBuilder();
+            for (DishInQueue dishInQueue : queueDish) {
+                if (dishId == dishInQueue.getDish().getDishId()) {
+//                    if (dishInQueue.isOverMaterial()) {
+                    params.append(dishInQueue.getDish()
+                            .getOrderDetailId()).append("_");
 //                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<StatusResponse> call, Throwable t) {
-//
-//                }
-//            });
-//        });
+                }
+            }
+            String formatParams = params.deleteCharAt(params.length() - 1).toString();
+            Services services = getService();
+            services.postKeepOrderDetail(formatParams).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            Log.d("Hoang", "keep onResponse: successfully");
+                            for (DishInQueue dishInQueue : queueDish) {
+                                if (dishId == dishInQueue.getDish().getDishId()) {
+                                    if (dishInQueue.isOverMaterial())
+                                        dishInQueue.setOverMaterial(false);
+                                }
+                            }
+                            refreshListViewDish();
+
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        }
+    }
+
+    private void doCancelOrderDetail(int dishId) {
+        LinkedList<DishInQueue> newQueue = new LinkedList<>();
+        if (RetrofitUtils.checkNetworkAndToast(getContext())) {
+            StringBuilder params = new StringBuilder();
+            for (DishInQueue dishInQueue : queueDish) {
+                if (dishId == dishInQueue.getDish().getDishId()) {
+//                    if (dishInQueue.isOverMaterial()) {
+                    params.append(dishInQueue.getDish()
+                            .getOrderDetailId()).append("_");
+//                    }
+                } else {
+                    newQueue.add(dishInQueue);
+                }
+            }
+            String formatParams = params.deleteCharAt(params.length() - 1).toString();
+            Services services = getService();
+            services.postNotifyDishNotAvailable(formatParams).enqueue(new Callback<StatusResponse>() {
+                @Override
+                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                    if (response.isSuccessful()) {
+                        if (null != response.body()) {
+                            Log.d("Hoang", "cancel onResponse: successfully");
+                            queueDish = newQueue;
+                            refreshListViewDish();
+
+                        }
+                    } else {
+                        if (response.code() == 500) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                        } else {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<StatusResponse> call, Throwable t) {
+                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                }
+            });
+        }
+
+    }
+
+    private void handleServeAllDish(int dishId) {
+        prepareListIdParams(dishId);
+        if (listCompletedDishLong.toString().trim().length() > 0) {
+            showProcessing();
+            Services services = getService();
+            String listDishParam = listCompletedDishLong.deleteCharAt(listCompletedDishLong.length() - 1).toString();
+            listDishParam = listDishParam.startsWith(";") ? listDishParam.substring(1) : listDishParam;
+            listCompletedDishLong = new StringBuilder(listDishParam);
+            services.markListDishDone(listDishParam)
+                    .enqueue(new Callback<StatusResponse>() {
+                        @Override
+                        public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (null != response.body()) {
+                                    String[] listDish = listCompletedDishLong.toString().split(";");
+                                    for (String cookedDish : listDish) {
+                                        String[] id = cookedDish.split("_");
+                                        int dishId = Integer.parseInt(id[1]);
+                                        removeDishIsCooked(dishId);
+                                    }
+                                    listCompletedDishLong = new StringBuilder("");
+                                }
+                            } else {
+                                if (response.code() == 500) {
+                                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                                } else {
+                                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                                }
+                            }
+                            hideProcessing();
+                        }
+
+                        @Override
+                        public void onFailure(Call<StatusResponse> call, Throwable t) {
+                            hideProcessing();
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                        }
+                    });
+        } else {
+            hideProcessing();
+//                    btDone.performClick();
+        }
+
+    }
+
+    private void prepareListIdParams(int dishId) {
+        for (DishInQueue dishInQueue : queueDish) {
+            if (dishInQueue.getDish().getDishId() == dishId) {
+                listCompletedDishLong.append(String.valueOf(dishInQueue.getOrderId()))
+                        .append("_")
+                        .append(String.valueOf(dishId))
+                        .append(";");
+            }
+        }
     }
 
     private void updateCheckInQueueDish(Date identify, boolean isChecked) {
@@ -204,6 +323,7 @@ public class DishFragment extends Fragment {
                 dishInOrder.setDish(dishInQueue.getDish());
                 dishInOrder.setIdentity(dishInQueue.getIdentity());
                 dishInOrder.setChecked(dishInQueue.isChecked());
+                dishInOrder.setOverMaterial(dishInQueue.isOverMaterial());
                 boolean isExited = false;
                 for (DishInOrder dish : dishInOrders) {
                     if (dish.getDish().getDishId() == dishInOrder.getDish().getDishId()) {
@@ -228,10 +348,7 @@ public class DishFragment extends Fragment {
     public void refreshListViewDish() {
         dishInOrders.clear();
         setDishInOrders();
-//        lvDishInQueue.setAdapter(dishQueueAdapter);
         dishQueueAdapter.setData(dishInOrders);
-//        dishQueueAdapter.notifyDataSetChanged();
-//        lvDishInQueue.invalidateViews();
     }
 
     private int getOrderIdByDish(int dishId) {
@@ -265,19 +382,13 @@ public class DishFragment extends Fragment {
 
     public void updateDishIsNotAvailable(List<Integer> integers) {
         boolean isChange = false;
-        LinkedList<DishInQueue> newQueueDish = new LinkedList<>();
         for (DishInQueue dishInQueue : queueDish) {
-            if (!integers.contains(dishInQueue.getDish().getOrderDetailId())) {
-                newQueueDish.add(dishInQueue);
-//                isChange = true;
-            } else {
-                if (false == isChange) {
-                    isChange = true;
-                }
+            if (integers.contains(dishInQueue.getDish().getOrderDetailId())) {
+                dishInQueue.setOverMaterial(true);
+                if (!isChange) isChange = true;
             }
         }
         if (isChange) {
-            queueDish = newQueueDish;
             refreshListViewDish();
         }
     }
@@ -302,6 +413,12 @@ public class DishFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (null == queueDish) {
+            queueDish = new LinkedList<>();
+        }
+        if (null == dishInOrders) {
+            dishInOrders = new ArrayList<>();
+        }
         Log.d(Constant.LOG_TAG, "Dish-onResume");
     }
 
@@ -319,43 +436,60 @@ public class DishFragment extends Fragment {
         if (null != list) {
             if (list.size() > 0) {
                 updateDishIsNotAvailable(list);
-                notifyUpdateDishInChefComplete(list);
+//                notifyUpdateDishInChefComplete(items != null ? items : new ArrayList<Integer>());
             }
         }
     }
 
     private void notifyUpdateDishInChefComplete(List<Integer> list) {
-        if (RetrofitUtils.checkNetworkAndToast(getContext())) {
-            StringBuilder params = new StringBuilder();
-            for (Integer id : list) {
-                params.append(String.valueOf(id))
-                        .append("_");
-            }
-            String formatParams = params.deleteCharAt(params.length() - 1).toString();
-            Services services = getService();
-            services.postNotifyDishNotAvailable(formatParams).enqueue(new Callback<StatusResponse>() {
-                @Override
-                public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
-                    if (response.isSuccessful()) {
-                        if (null != response.body()) {
-                            ToastUtils.toastShortMassage(DishFragment.this.getContext(), "Notify update Success");
-                        }
-                    } else {
-                        if (response.code() == 500) {
-                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
-                        } else {
-                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
-                        }
+        if (null != list) {
+            if (list.size() > 0) {
+                if (RetrofitUtils.checkNetworkAndToast(getContext())) {
+                    StringBuilder params = new StringBuilder();
+                    for (Integer id : list) {
+                        params.append(String.valueOf(id))
+                                .append("_");
                     }
-                }
+                    String formatParams = params.deleteCharAt(params.length() - 1).toString();
+                    Services services = getService();
+                    services.postNotifyDishNotAvailable(formatParams).enqueue(new Callback<StatusResponse>() {
+                        @Override
+                        public void onResponse(Call<StatusResponse> call, Response<StatusResponse> response) {
+                            if (response.isSuccessful()) {
+                                if (null != response.body()) {
+                                    ToastUtils.toastShortMassage(DishFragment.this.getContext(), "Notify update Success");
+                                }
+                            } else {
+                                if (response.code() == 500) {
+                                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_not_process));
+                                } else {
+                                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_msg));
+                                }
+                            }
+                        }
 
-                @Override
-                public void onFailure(Call<StatusResponse> call, Throwable t) {
-                    ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
-                }
-            });
-        }else {
+                        @Override
+                        public void onFailure(Call<StatusResponse> call, Throwable t) {
+                            ToastUtils.toastLongMassage(getContext(), getString(R.string.text_response_error_connection));
+                        }
+                    });
+                } else {
 //            notifyUpdateDishInChefComplete(list);
+                }
+            }
+        }
+    }
+
+    public void cancelDish(List<Integer> orderDetailIds) {
+        List<DishInQueue> removeData = new ArrayList<>();
+        for (DishInQueue dishInQueue : queueDish) {
+            if (orderDetailIds.contains(dishInQueue.getDish().getOrderDetailId())) {
+                removeData.add(dishInQueue);
+            }
+        }
+        if (removeData.size() > 0) {
+            queueDish.removeAll(removeData);
+            refreshListViewDish();
         }
     }
 

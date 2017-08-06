@@ -26,4 +26,5 @@
     <color name="holoRedLight">@android:color/holo_red_light</color>
     <color name="colorChef">#D32F2F</color>
     <color name="colorWarning">#FFFF00</color>
+    <color name="colorWarningBlue">#FFCC00</color>
 </resources>

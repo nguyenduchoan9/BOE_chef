@@ -70,6 +70,10 @@ public interface Services {
     @FormUrlEncoded
     Call<StatusResponse> postNotifyDishNotAvailable(@Field("list_order_detail_id") String ids);
 
+    @POST("orders/keep_order_detail")
+    @FormUrlEncoded
+    Call<StatusResponse> postKeepOrderDetail(@Field("list_order_detail_id") String ids);
+
     @POST("orders/mark_order_detail_served")
     @FormUrlEncoded
     Call<StatusResponse> markOrderDetailServed(@Field("order_detail_id") String ids);
@@ -77,4 +81,8 @@ public interface Services {
     @POST("orders/mark_list_order_detail_served")
     @FormUrlEncoded
     Call<StatusResponse> markListOrderDetailServed(@Field("list_order_detail_id") String ids);
+
+    @POST("orders/payed_by_cash")
+    @FormUrlEncoded
+    Call<StatusResponse> markPayedByCash(@Field("orderId") int id);
 }

@@ -12,6 +12,7 @@ public class DishInOrder {
     private Dish dish;
     private boolean checked;
     private Date identity;
+    private boolean overMaterial = false;
 
     public DishInOrder(int quantity, Dish dish) {
         this.quantity = quantity;
@@ -52,5 +53,13 @@ public class DishInOrder {
 
     public void setDish(Dish dish) {
         this.dish = dish;
+    }
+
+    public boolean isOverMaterial() {
+        return overMaterial;
+    }
+
+    public void setOverMaterial(boolean overMaterial) {
+        this.overMaterial = overMaterial;
     }
 }
