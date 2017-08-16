@@ -31,4 +31,6 @@
     <string name="text_not_available_network">Kết nối của bạn không khả dụng</string>
     <string name="text_server_maintanance">Hệ thống đang bảo trì</string>
     <string name="text_login_as_cashier">Login as cashier</string>
+    <string name="text_dish_keep">Keep</string>
+    <string name="text_dish_reject">Reject</string>
 </resources>

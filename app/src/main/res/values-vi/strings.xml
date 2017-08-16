@@ -33,5 +33,7 @@
     <string name="text_response_error_msg">The server is not available</string>
     <string name="text_response_error_connection">The connection has a error</string>
     <string name="text_response_error_not_process">The server can process this request</string>
-    <string name="text_login_as_cashier">Login as cashier</string>
+    <string name="text_login_as_cashier">Đăng nhập như thu ngân</string>
+    <string name="text_dish_keep">Giữ</string>
+    <string name="text_dish_reject">Loại ra</string>
 </resources>

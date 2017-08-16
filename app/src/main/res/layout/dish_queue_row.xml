@@ -67,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Keep"
+                android:text="@string/text_dish_keep"
                 android:textColor="@color/order_green"
                 android:textSize="20dp"/>
 
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
-                android:text="Reject"
+                android:text="@string/text_dish_reject"
                 android:textColor="@color/colorChef"
                 android:textSize="20dp"/>
         </LinearLayout>
